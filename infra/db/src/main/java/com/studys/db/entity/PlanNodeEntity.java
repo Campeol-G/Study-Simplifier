@@ -39,6 +39,15 @@ public class PlanNodeEntity {
     @Column(name = "status", nullable = false, length = 30)
     private String status;
 
+    @Column(name = "slug", length = 255)
+    private String slug;
+
+    @Column(name = "ordem", nullable = false)
+    private int ordem;
+
+    @Column(name = "tipo", length = 30)
+    private String tipo;
+
     @Column(name = "criado_em", nullable = false)
     private Instant criadoEm;
 
@@ -92,6 +101,30 @@ public class PlanNodeEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public int getOrdem() {
+        return ordem;
+    }
+
+    public void setOrdem(int ordem) {
+        this.ordem = ordem;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
     public Instant getCriadoEm() {

@@ -32,6 +32,9 @@ public class PlanEntity {
     @Column(name = "status", nullable = false, length = 30)
     private String status;
 
+    @Column(name = "descricao", columnDefinition = "TEXT")
+    private String descricao;
+
     @Column(name = "criado_em", nullable = false)
     private Instant criadoEm;
 
@@ -67,6 +70,14 @@ public class PlanEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
     public Instant getCriadoEm() {

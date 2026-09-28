@@ -25,6 +25,9 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
+    @Column(name = "senha_hash", nullable = false, length = 255)
+    private String senhaHash;
+
     @Column(name = "criado_em", nullable = false)
     private Instant criadoEm;
 
@@ -34,6 +37,13 @@ public class UserEntity {
     public UserEntity(String nome, String email) {
         this.nome = nome;
         this.email = email;
+        this.criadoEm = Instant.now();
+    }
+
+    public UserEntity(String nome, String email, String senhaHash) {
+        this.nome = nome;
+        this.email = email;
+        this.senhaHash = senhaHash;
         this.criadoEm = Instant.now();
     }
 
@@ -55,6 +65,14 @@ public class UserEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getSenhaHash() {
+        return senhaHash;
+    }
+
+    public void setSenhaHash(String senhaHash) {
+        this.senhaHash = senhaHash;
     }
 
     public Instant getCriadoEm() {

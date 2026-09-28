@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { registerSchema, type RegisterInput } from "../auth/validation";
 import { Rule, TermFrame } from "../components/chrome";
-import { Box, BracketInput, TermButton, TextLink } from "../components/controls";
-import { AuthLayout } from "./AuthLayout";
+import { PromptField, TermButton, TextLink } from "../components/controls";
 
 export function RegisterPage() {
   const { register: signUp } = useAuth();
@@ -29,66 +28,66 @@ export function RegisterPage() {
   };
 
   return (
-    <AuthLayout>
-      <TermFrame path="~/studys/register">
-        <p className="text-zinc-100">$ studys auth create</p>
-        <p className="text-zinc-600">registro local · plano free incluso</p>
-
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-6 space-y-5">
-          <Box label="nome" error={errors.name?.message}>
-            <BracketInput
-              autoComplete="name"
-              placeholder="Ada Lovelace"
-              {...register("name")}
-            />
-          </Box>
-
-          <Box label="email" error={errors.email?.message}>
-            <BracketInput
-              type="email"
-              autoComplete="email"
-              placeholder="voce@studys.dev"
-              {...register("email")}
-            />
-          </Box>
-
-          <Box label="senha" error={errors.password?.message}>
-            <BracketInput
-              type="password"
-              autoComplete="new-password"
-              placeholder="mínimo 6 caracteres"
-              {...register("password")}
-            />
-          </Box>
-
-          <Box label="confirmar senha" error={errors.confirm?.message}>
-            <BracketInput
-              type="password"
-              autoComplete="new-password"
-              placeholder="repita a senha"
-              {...register("confirm")}
-            />
-          </Box>
+    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-14">
+      <TermFrame path="~/register">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+          <PromptField
+            id="reg-nome"
+            label="nome"
+            autoComplete="name"
+            placeholder="Ada Lovelace"
+            error={errors.name?.message}
+            {...register("name")}
+          />
+          <PromptField
+            id="reg-email"
+            label="email"
+            type="email"
+            autoComplete="email"
+            placeholder="voce@studys.dev"
+            error={errors.email?.message}
+            {...register("email")}
+          />
+          <PromptField
+            id="reg-senha"
+            label="senha"
+            type="password"
+            autoComplete="new-password"
+            placeholder="mínimo 6 caracteres"
+            error={errors.password?.message}
+            {...register("password")}
+          />
+          <PromptField
+            id="reg-conf"
+            label="confirmar"
+            type="password"
+            autoComplete="new-password"
+            placeholder="repita a senha"
+            error={errors.confirm?.message}
+            {...register("confirm")}
+          />
 
           {serverError && (
-            <p className="border border-zinc-700 px-3 py-2 text-[13px] text-zinc-100">
+            <p className="text-[13px] text-zinc-200">
               {"! "}
               {serverError}
             </p>
           )}
 
-          <TermButton type="submit" loading={isSubmitting} loadingLabel="criando…">
-            criar conta
-          </TermButton>
+          <div className="pt-2">
+            <TermButton type="submit" loading={isSubmitting} loadingLabel="criando…">
+              criar conta
+            </TermButton>
+          </div>
         </form>
 
         <div className="mt-6">
           <Rule />
-          <p className="mt-3 text-[13px] text-zinc-600">
-            já tem conta? <TextLink to="/login">entrar</TextLink>
+          <p className="mt-4 text-[13px] text-zinc-600">
+            já tem conta? <TextLink to="/login">~/login</TextLink>
           </p>
         </div>
       </TermFrame>
-    </AuthLayout>
+    </div>
   );
 }

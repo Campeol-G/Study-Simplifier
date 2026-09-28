@@ -1,8 +1,15 @@
-import { Link, useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useRoutePath } from "../lib/route";
 
-/** barra superior: uma linha de texto, sem pill, sem blur */
+/** abas como pastas: ~/home  ~/about  ~/updates */
+const TABS = [
+  { to: "/", path: "~/home", end: true },
+  { to: "/about", path: "~/about", end: false },
+  { to: "/updates", path: "~/updates", end: false },
+];
+
 export function TopBar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -13,74 +20,95 @@ export function TopBar() {
   };
 
   return (
-    <header className="border-b border-zinc-800/80">
-      <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-3 text-[13px]">
-        <Link to="/" className="text-zinc-200 hover:text-white">
-          studys<span className="text-zinc-600">@web:~$</span>
-          <span className="cli-cursor ml-2" />
+    <header className="border-b border-zinc-800/70">
+      <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 text-[13px]">
+        <Link to="/" className="shrink-0 text-zinc-200 transition-colors hover:text-white">
+          studys
         </Link>
-        <nav className="flex items-center gap-4 text-zinc-500">
+
+        <nav className="flex min-w-0 items-center gap-4">
+          {TABS.map((t) => (
+            <NavLink
+              key={t.to}
+              to={t.to}
+              end={t.end}
+              className={({ isActive }) =>
+                `transition-colors duration-200 ${
+                  isActive ? "text-zinc-100" : "text-zinc-600 hover:text-zinc-300"
+                }`
+              }
+            >
+              {t.path}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="flex shrink-0 items-center gap-4">
           {user ? (
             <>
-              <span className="hidden max-w-40 truncate sm:inline">{user.email}</span>
+              <span className="hidden max-w-32 truncate text-zinc-600 md:inline">
+                {user.email}
+              </span>
               <button
                 type="button"
                 onClick={onLogout}
-                className="hover:text-zinc-100"
+                className="text-zinc-500 transition-colors hover:text-zinc-200"
               >
-                [sair]
+                ~/sair
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-zinc-100">[login]</Link>
-              <Link to="/register" className="hover:text-zinc-100">[register]</Link>
+              <Link to="/login" className="text-zinc-500 transition-colors hover:text-zinc-200">
+                ~/login
+              </Link>
+              <Link
+                to="/register"
+                className="text-zinc-500 transition-colors hover:text-zinc-200"
+              >
+                ~/register
+              </Link>
             </>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );
 }
 
-/** a janela de terminal — é praticamente a UI inteira */
+/** divisória fina */
+export function Rule() {
+  return <div aria-hidden className="h-px bg-zinc-800/70" />;
+}
+
+/** moldura de terminal: usada nas telas de auth */
 export function TermFrame({
-  path = "~/studys",
+  path,
   children,
 }: {
-  path?: string;
+  path: string;
   children: ReactNode;
 }) {
   return (
-    <div className="border border-zinc-800 bg-[#0c0c0f]">
-      <div className="flex items-center justify-between border-b border-zinc-800/70 px-4 py-2 text-xs text-zinc-600">
-        <span className="truncate">┌─ {path}</span>
-        <span className="shrink-0">utf-8</span>
+    <div className="border border-zinc-800/80 bg-[#0c0c0f]">
+      <div className="border-b border-zinc-800/70 px-5 py-2 text-xs text-zinc-600">
+        {path}
       </div>
-      <div className="px-4 py-5 sm:px-6 sm:py-6">{children}</div>
+      <div className="px-5 py-6">{children}</div>
     </div>
   );
 }
 
-/** statusline estilo tmux — estática, só contexto */
-export function StatusLine({ route }: { route: string }) {
+export function StatusLine() {
+  const route = useRoutePath();
   return (
-    <footer className="border-t border-zinc-800/80">
-      <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-2.5 text-xs text-zinc-600">
+    <footer className="border-t border-zinc-800/70">
+      <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-2.5 text-xs text-zinc-600">
         <span>
-          <span className="text-zinc-400">[studys 0.1]</span> {route}
+          <span className="text-zinc-500">studys 0.1</span> {route}
         </span>
-        <span>feat/frontend* · mock-local</span>
+        <span>mock-local</span>
       </div>
     </footer>
-  );
-}
-
-/** divisória de texto, não decoração */
-export function Rule() {
-  return (
-    <div aria-hidden className="select-none overflow-hidden whitespace-nowrap text-zinc-800">
-      {"─".repeat(72)}
-    </div>
   );
 }

@@ -8,21 +8,21 @@ import {
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { StatusLine, TopBar } from "./components/chrome";
+import { AboutPage } from "./pages/About";
 import { DashboardPage } from "./pages/Dashboard";
 import { ForgotPage } from "./pages/Forgot";
 import { LandingPage } from "./pages/Landing";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
+import { UpdatesPage } from "./pages/Updates";
 
 function ProtectedRoute() {
   const { user, ready } = useAuth();
   const location = useLocation();
   if (!ready) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-4 pt-16">
-        <p className="text-[13px] text-zinc-500">
-          $ studys session --check<span className="cli-cursor ml-2" />
-        </p>
+      <div className="mx-auto w-full max-w-xl px-5 pt-14 text-[13px] text-zinc-600">
+        verificando sessão…
       </div>
     );
   }
@@ -39,12 +39,6 @@ function PublicOnly() {
   return <Outlet />;
 }
 
-function RouteStatus() {
-  const { pathname } = useLocation();
-  const route = pathname === "/" ? "~/" : `~${pathname}`;
-  return <StatusLine route={route} />;
-}
-
 export default function App() {
   return (
     <AuthProvider>
@@ -54,6 +48,8 @@ export default function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/updates" element={<UpdatesPage />} />
               <Route element={<PublicOnly />}>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
@@ -65,7 +61,7 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          <RouteStatus />
+          <StatusLine />
         </div>
       </BrowserRouter>
     </AuthProvider>

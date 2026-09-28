@@ -5,8 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { loginSchema, type LoginInput } from "../auth/validation";
 import { Rule, TermFrame } from "../components/chrome";
-import { Box, BracketInput, TermButton, TextLink } from "../components/controls";
-import { AuthLayout } from "./AuthLayout";
+import { PromptField, TermButton, TextLink } from "../components/controls";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -30,51 +29,51 @@ export function LoginPage() {
   };
 
   return (
-    <AuthLayout>
-      <TermFrame path="~/studys/login">
-        <p className="text-zinc-100">$ studys auth login</p>
-        <p className="text-zinc-600">sessão local · sem backend por enquanto</p>
-
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-6 space-y-5">
-          <Box label="email" error={errors.email?.message}>
-            <BracketInput
-              type="email"
-              autoComplete="email"
-              placeholder="voce@studys.dev"
-              {...register("email")}
-            />
-          </Box>
-
-          <Box label="senha" error={errors.password?.message}>
-            <BracketInput
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              {...register("password")}
-            />
-          </Box>
+    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-14">
+      <TermFrame path="~/login">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+          <PromptField
+            id="login-email"
+            label="email"
+            type="email"
+            autoComplete="email"
+            placeholder="voce@studys.dev"
+            error={errors.email?.message}
+            {...register("email")}
+          />
+          <PromptField
+            id="login-senha"
+            label="senha"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            error={errors.password?.message}
+            {...register("password")}
+          />
 
           {serverError && (
-            <p className="border border-zinc-700 px-3 py-2 text-[13px] text-zinc-100">
+            <p className="text-[13px] text-zinc-200">
               {"! "}
               {serverError}
             </p>
           )}
 
-          <TermButton type="submit" loading={isSubmitting} loadingLabel="entrando…">
-            entrar
-          </TermButton>
+          <div className="pt-2">
+            <TermButton type="submit" loading={isSubmitting} loadingLabel="entrando…">
+              entrar
+            </TermButton>
+          </div>
         </form>
 
         <div className="mt-6">
           <Rule />
-          <p className="mt-3 text-[13px] text-zinc-600">
-            <TextLink to="/forgot">esqueci a senha</TextLink>
+          <p className="mt-4 text-[13px]">
+            <TextLink to="/forgot">~/recover</TextLink>
             {"  ·  "}
-            <TextLink to="/register">criar conta</TextLink>
+            <TextLink to="/register">~/register</TextLink>
           </p>
         </div>
       </TermFrame>
-    </AuthLayout>
+    </div>
   );
 }

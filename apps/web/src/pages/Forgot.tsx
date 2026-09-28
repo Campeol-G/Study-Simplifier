@@ -9,8 +9,7 @@ import {
   type ResetInput,
 } from "../auth/validation";
 import { Rule, TermFrame } from "../components/chrome";
-import { Box, BracketInput, TermButton, TextLink } from "../components/controls";
-import { AuthLayout } from "./AuthLayout";
+import { PromptField, TermButton, TextLink } from "../components/controls";
 
 export function ForgotPage() {
   const { requestReset, resetPassword } = useAuth();
@@ -43,112 +42,116 @@ export function ForgotPage() {
   };
 
   return (
-    <AuthLayout>
-      <TermFrame path="~/studys/recover">
+    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-14">
+      <TermFrame path="~/recover">
         {done ? (
           <div>
-            <p className="text-zinc-100">$ studys auth reset --status</p>
-            <p className="mt-3 bg-zinc-100 px-3 py-2 text-[13px] text-black">
+            <p className="text-[14.5px] text-zinc-200">
               ok: senha redefinida. você já pode entrar.
             </p>
             <p className="mt-4 text-[13px]">
-              <TextLink to="/login">$ studys auth login</TextLink>
+              <TextLink to="/login">~/login</TextLink>
             </p>
           </div>
         ) : (
           <div>
-            <p className="text-zinc-100">$ studys auth reset --request</p>
-            <p className="text-zinc-600">passo {issuedToken ? "2/2" : "1/2"}</p>
-
             <form
               onSubmit={forgotForm.handleSubmit(onRequest)}
               noValidate
-              className="mt-6 space-y-5"
+              className="space-y-4"
             >
-              <Box label="email" error={forgotForm.formState.errors.email?.message}>
-                <BracketInput
-                  type="email"
-                  placeholder="voce@studys.dev"
-                  {...forgotForm.register("email")}
-                />
-              </Box>
-              <TermButton
-                type="submit"
-                loading={forgotForm.formState.isSubmitting}
-                loadingLabel="gerando…"
-              >
-                solicitar token
-              </TermButton>
+              <PromptField
+                id="rec-email"
+                label="email"
+                type="email"
+                placeholder="voce@studys.dev"
+                error={forgotForm.formState.errors.email?.message}
+                {...forgotForm.register("email")}
+              />
+              <div className="pt-2">
+                <TermButton
+                  type="submit"
+                  loading={forgotForm.formState.isSubmitting}
+                  loadingLabel="gerando…"
+                >
+                  solicitar token
+                </TermButton>
+              </div>
             </form>
 
             {issuedToken && (
-              <div className="mt-6">
+              <div className="mt-8">
                 <Rule />
-                <p className="mt-4 text-[13px] text-zinc-400">
-                  token (mock, sem email real):{" "}
-                  <span className="text-zinc-100">{issuedToken}</span>
+                <p className="mt-4 text-[13px] text-zinc-500">
+                  token mock, sem email real:{" "}
+                  <span className="text-zinc-200">{issuedToken}</span>
                 </p>
                 <form
                   onSubmit={resetForm.handleSubmit(onReset)}
                   noValidate
-                  className="mt-4 space-y-5"
+                  className="mt-4 space-y-4"
                 >
-                  <Box label="token" error={resetForm.formState.errors.token?.message}>
-                    <BracketInput
-                      autoComplete="off"
-                      placeholder="A1B2C3D4"
-                      {...resetForm.register("token")}
-                    />
-                  </Box>
-                  <Box
+                  <PromptField
+                    id="res-token"
+                    label="token"
+                    autoComplete="off"
+                    placeholder="A1B2C3D4"
+                    error={resetForm.formState.errors.token?.message}
+                    {...resetForm.register("token")}
+                  />
+                  <PromptField
+                    id="res-senha"
                     label="nova senha"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="mínimo 6 caracteres"
                     error={resetForm.formState.errors.password?.message}
-                  >
-                    <BracketInput
-                      type="password"
-                      autoComplete="new-password"
-                      placeholder="mínimo 6 caracteres"
-                      {...resetForm.register("password")}
-                    />
-                  </Box>
-                  <Box
-                    label="confirmar senha"
+                    {...resetForm.register("password")}
+                  />
+                  <PromptField
+                    id="res-conf"
+                    label="confirmar"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="repita a senha"
                     error={resetForm.formState.errors.confirm?.message}
-                  >
-                    <BracketInput
-                      type="password"
-                      autoComplete="new-password"
-                      placeholder="repita a senha"
-                      {...resetForm.register("confirm")}
-                    />
-                  </Box>
-                  <TermButton
-                    type="submit"
-                    loading={resetForm.formState.isSubmitting}
-                    loadingLabel="redefinindo…"
-                  >
-                    redefinir senha
-                  </TermButton>
+                    {...resetForm.register("confirm")}
+                  />
+                  {serverError && (
+                    <p className="text-[13px] text-zinc-200">
+                      {"! "}
+                      {serverError}
+                    </p>
+                  )}
+                  <div className="pt-2">
+                    <TermButton
+                      type="submit"
+                      loading={resetForm.formState.isSubmitting}
+                      loadingLabel="redefinindo…"
+                    >
+                      redefinir senha
+                    </TermButton>
+                  </div>
                 </form>
               </div>
             )}
 
-            {serverError && (
-              <p className="mt-4 border border-zinc-700 px-3 py-2 text-[13px] text-zinc-100">
+            {serverError && !issuedToken && (
+              <p className="mt-4 text-[13px] text-zinc-200">
                 {"! "}
                 {serverError}
               </p>
             )}
 
-            <div className="mt-6">
+            <div className="mt-8">
               <Rule />
-              <p className="mt-3 text-[13px] text-zinc-600">
-                <TextLink to="/login">← voltar ao login</TextLink>
+              <p className="mt-4 text-[13px]">
+                <TextLink to="/login">← ~/login</TextLink>
               </p>
             </div>
           </div>
         )}
       </TermFrame>
-    </AuthLayout>
+    </div>
   );
 }

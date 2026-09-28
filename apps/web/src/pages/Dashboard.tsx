@@ -19,28 +19,23 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 pb-16 pt-10 sm:pt-16">
-      <TermFrame path="~/studys/app">
-        <p className="text-zinc-100">$ studys session --info</p>
-        <p className="text-zinc-600">backend: disconnected · dados mockados</p>
-
-        <div className="mt-5">
-          <Rule />
-          <div className="mt-4 space-y-1 text-[13.5px]">
-            <p>
-              <span className="text-zinc-600">user  </span>
-              <span className="text-zinc-200">{user?.name ?? "guest"}</span>
-            </p>
-            <p>
-              <span className="text-zinc-600">email </span>
-              <span className="text-zinc-200">{user?.email ?? "—"}</span>
-            </p>
-          </div>
+    <div className="mx-auto w-full max-w-xl px-5 pb-20 pt-14">
+      <TermFrame path="~/app">
+        <div className="space-y-1 text-[14.5px]">
+          <p>
+            <span className="text-zinc-600">user&nbsp;&nbsp;</span>
+            <span className="text-zinc-200">{user?.name ?? "guest"}</span>
+          </p>
+          <p>
+            <span className="text-zinc-600">email </span>
+            <span className="text-zinc-200">{user?.email ?? "—"}</span>
+          </p>
         </div>
 
-        <div className="mt-5">
-          <p className="text-zinc-100">$ studys plan --list</p>
-          <div className="mt-2 space-y-1 text-[13.5px]">
+        <div className="mt-8">
+          <Rule />
+          <p className="mt-4 text-[13px] text-zinc-600">planos — 03, mockados</p>
+          <div className="mt-2 space-y-1 text-[14px]">
             {FAKE_PLANS.map((p, i) => (
               <p key={p.id} className="flex justify-between gap-4">
                 <span className="truncate text-zinc-400">
@@ -55,18 +50,12 @@ export function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6">
-          <TermButton
-            type="button"
-            onClick={onLogout}
-          >
+        <div className="mt-8">
+          <TermButton type="button" onClick={onLogout}>
             sair
           </TermButton>
         </div>
       </TermFrame>
-      <p className="mt-4 text-xs leading-relaxed text-zinc-600">
-        {"// próximo passo real: trocar o provider mock por POST /auth/* da API Spring."}
-      </p>
     </div>
   );
 }

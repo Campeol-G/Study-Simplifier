@@ -7,6 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContentCacheRepository extends JpaRepository<ContentCacheEntity, UUID> {
     Optional<ContentCacheEntity> findByTopicoSlugAndTipo(String topicoSlug, String tipo);
-
-    Optional<ContentCacheEntity> findByTopicoSlug(String topicoSlug);
 }

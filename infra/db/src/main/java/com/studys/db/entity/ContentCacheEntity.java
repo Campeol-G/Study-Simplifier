@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
@@ -12,7 +13,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "content_cache")
+@Table(name = "content_cache", uniqueConstraints = @UniqueConstraint(columnNames = {"topico_slug", "tipo"}))
 public class ContentCacheEntity {
 
     @Id
@@ -21,7 +22,7 @@ public class ContentCacheEntity {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "topico_slug", nullable = false, unique = true, length = 255)
+    @Column(name = "topico_slug", nullable = false, length = 255)
     private String topicoSlug;
 
     @Column(name = "tipo", nullable = false, length = 30)

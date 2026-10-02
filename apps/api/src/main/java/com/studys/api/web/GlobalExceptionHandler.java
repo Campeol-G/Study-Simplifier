@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -88,15 +89,35 @@ public class GlobalExceptionHandler {
      * Fallback de 500 (achado A3). A exceção vai inteira para o log; o cliente recebe só
      * {@code "Erro interno"}.
      *
-     * <p>Esta é também a rede que impede o handler de {@code Exception} de virar um aspirador: antes
-     * de cair aqui, {@link #naoEncontrado(RuntimeException)} e os handlers de 4xx já capturaram o que
-     * tem status de cliente, e o tratamento específico do Spring (que carrega o status na própria
-     * exceção) tem precedência sobre o handler genérico do {@code @RestControllerAdvice}.
+     * <p><strong>Cuidado clássico, verificado:</strong> um handler de {@code Exception} também
+     * alcança as exceções que o Spring já classificou, porque
+     * {@code ExceptionHandlerExceptionResolver} (ordem 0) tem precedência sobre
+     * {@code ResponseStatusExceptionResolver} (ordem 1) e sobre o
+     * {@code DefaultHandlerExceptionResolver}. Sem o desvio abaixo, um {@code 406} de
+     * {@code Accept} incompatível viraria {@code 500 "Erro interno"} — trocar um erro de cliente
+     * claramente identificado por um de servidor. Por isso, quando a exceção implementa
+     * {@code ErrorResponse}, o status dela é respeitado e a mensagem também: são de cliente, não
+     * são segredo interno.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> erroInesperado(Exception e) {
+        if (e instanceof ErrorResponse erroDeCliente) {
+            LOG.debug("Erro de cliente não tratado especificamente: {}", e.toString());
+            return corpo(HttpStatus.valueOf(erroDeCliente.getStatusCode().value()),
+                    mensagemDe(erroDeCliente));
+        }
         LOG.error("Erro não mapeado em {} {}", e.getClass().getName(), e.getMessage(), e);
         return corpo(HttpStatus.INTERNAL_SERVER_ERROR, ERRO_INTERNO);
+    }
+
+    /**
+     * {@code ResponseStatusException} traz o motivo que o código passou; as demais implementações de
+     * {@code ErrorResponse} trazem a descrição do próprio status, que já é informação útil e não é
+     * detalhe interno.
+     */
+    private static String mensagemDe(ErrorResponse erro) {
+        String motivo = erro.getBody().getDetail();
+        return motivo == null || motivo.isBlank() ? erro.getBody().getTitle() : motivo;
     }
 
     private static ResponseEntity<Map<String, String>> corpo(HttpStatus status, String mensagem) {

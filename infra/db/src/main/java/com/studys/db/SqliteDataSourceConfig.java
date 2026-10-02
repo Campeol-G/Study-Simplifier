@@ -71,6 +71,12 @@ public class SqliteDataSourceConfig {
         if (caminho.isEmpty() || caminho.equals(":memory:")) {
             return null;
         }
+        // "file:memdb1?mode=memory" e "file:/abs/db.sqlite" sao URI, nao caminho de arquivo.
+        // Sem este guarda, Path.of("file:memdb1") faria createDirectories criar um diretorio
+        // espúrio no diretorio de trabalho do processo.
+        if (caminho.startsWith("file:")) {
+            return null;
+        }
         try {
             return Path.of(caminho);
         } catch (InvalidPathException e) {

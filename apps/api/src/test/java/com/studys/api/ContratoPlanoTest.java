@@ -172,12 +172,9 @@ class ContratoPlanoTest {
         }
     }
 
-    @Test
-    @DisplayName("conteudo e recursos, quando presentes, so carregam chaves e enums do contrato")
-    void conteudoERecursos() {
-        checarConteudoERecursos(plano);
-    }
-
+    // Nao ha @Test para checarConteudoERecursos(plano): nosNaoVaziosEChavesConhecidas fixa cada no
+    // nos 8 campos obrigatorios, entao os ramos de conteudo e recursos sao inalcancaveis nesse
+    // fixture. A cobertura real dos campos opcionais e ramoOpcionalComConteudoERecursos.
     private void checarConteudoERecursos(JsonNode raiz) {
         for (JsonNode no : raiz.get("nos")) {
             String id = no.path("id").asText();
@@ -314,8 +311,12 @@ class ContratoPlanoTest {
         JsonNode camposPlano = schema.path("properties").path("meta").path("properties");
         JsonNode camposSaida = esquemaSaida.path("properties").path("meta").path("properties");
         assertThat(chaves(camposSaida)).isEqualTo(chaves(camposPlano));
-        assertThat(chaves(esquemaSaida.path("properties").path("meta").path("required")))
-                .isEqualTo(chaves(schema.path("properties").path("meta").path("required")));
+        // propertyNames() de um ArrayNode devolve vazio: os dois lados seriam comparados como
+        // conjuntos vazios e a assercao passaria sem conferir nada. Aqui a lista e lida de verdade.
+        assertThat(valores(esquemaSaida.path("properties").path("meta").path("required")))
+                .containsExactlyInAnyOrder("horasPorSemana", "duracaoSemanas");
+        assertThat(valores(schema.path("properties").path("meta").path("required")))
+                .containsExactlyInAnyOrder("horasPorSemana", "duracaoSemanas");
         for (String chave : List.of("horasPorSemana", "duracaoSemanas")) {
             assertThat(camposSaida.path(chave).path("type").asText())
                     .isEqualTo(camposPlano.path(chave).path("type").asText());

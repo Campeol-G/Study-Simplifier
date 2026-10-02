@@ -1,16 +1,19 @@
 # StudyS
 
-O StudyS é um simplificador de estudos. Você aponta um assunto e as horas por semana que tem, e
-recebe um plano navegável: uma sequência de nós que vai do geral ao detalhe, com conteúdo e recursos
-em cada passo, e registro das tentativas para saber onde está faltando reforço.
+O StudyS é um simplificador de estudos. A ideia é esta: você aponta um assunto e as horas por semana
+que tem, e recebe um plano navegável — uma sequência de nós que vai do geral ao detalhe, com
+material em cada passo e registro das tentativas, para saber onde está faltando reforço. O estudo é
+tratado como **grafo**, não como lista: cada nó depende do anterior, então marcar um como feito não é
+só uma flag, é o que destrava o próximo.
 
-O estudo é tratado como **grafo**, não como lista. Cada nó depende do anterior, então marcar um como
-feito não é só uma flag: é o que desbloqueia o próximo.
+Duas dessas três peças ainda não existem; o [Estado atual](#estado-atual) diz exatamente o que está
+pronto e o que é promessa.
 
 ## Estado atual
 
 O que **funciona**: criar plano, listar, buscar, mudar o status do plano e o status de cada nó, com
-persistência em SQLite, migrations versionadas e 39 testes de integração passando.
+persistência em SQLite, migrations versionadas e uma suíte de 44 testes passando (17 de integração
+com o contexto Spring, mais testes de contrato e de esquema).
 
 O que **ainda não existe**, apesar de estar declarado no código:
 
@@ -19,7 +22,8 @@ O que **ainda não existe**, apesar de estar declarado no código:
 - **Geração de conteúdo.** `services/content-generation` é um módulo vazio. A tabela `content_cache`
   existe e aceita vários tipos por tópico, mas nada escreve nela.
 - **Readaptação do plano.** A árvore gerada hoje é estática: uma MATERIA e três TOPICOs, com
-  `PlanEngineService.gerarArvoreEstatica`. Não reage a desempenho, a tentativas nem a tempo decorrido.
+  `PlanEngineService.gerarArvoreEstatica`. O status do nó é gravado, mas nada o lê para destravar o
+  próximo passo nem para refazer o plano — é só um campo.
 - **Leitura e escrita de tentativas.** A tabela `attempts` existe e nada a preenche.
 - **Integração com a web.** `apps/web` é um protótipo visual com dados mockados; não chama a API.
   O contrato em `contrato/` existe para que as duas conversem por arquivo JSON, mas essa conversa
@@ -54,8 +58,10 @@ Endpoints (todos sem autenticação):
 | `PATCH` | `/plans/{id}` | muda o status (`em andamento`, `pausado`, `concluído`) |
 | `PATCH` | `/plans/{planId}/nodes/{nodeId}` | muda o status do nó (`TODO`, `IN_PROGRESS`, `DONE`, `SKIPPED`) |
 
-Todo erro responde `{"mensagem": "..."}` no mesmo formato. Erro de servidor nunca vaza detalhe
-interno: responde `{"mensagem": "Erro interno"}` e a exceção completa vai para o log.
+Erro de cliente e de servidor respondem `{"mensagem": "..."}` no mesmo formato. Erro de servidor nunca
+vaza detalhe interno: responde `{"mensagem": "Erro interno"}` e a exceção completa vai para o log.
+A única exceção ao corpo padronizado é o `406` para um cliente que recusa JSON (`Accept: application/xml`),
+que vem sem corpo — escrever JSON para quem pediu XML não é possível.
 
 ## Onde ficam os dados
 

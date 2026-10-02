@@ -120,6 +120,18 @@ class BancoSqliteBootstrapTest {
                         "--spring.jpa.hibernate.ddl-auto=validate");
     }
 
+    @Test
+    @DisplayName("o pool tem 1 conexao, como em producao: SQLite tem escritor unico")
+    void poolDeUmaConexao() {
+        try (ConfigurableApplicationContext contexto = novoContexto(
+                Path.of(System.getProperty("java.io.tmpdir"), "studys-pool-" + UUID_QUALQUER))) {
+            var dataSource = (com.zaxxer.hikari.HikariDataSource) contexto.getBean(javax.sql.DataSource.class);
+            assertThat(dataSource.getMaximumPoolSize())
+                    .as("SQLite tem escritor unico: mais de uma conexao concorrencia da SQLITE_BUSY")
+                    .isEqualTo(1);
+        }
+    }
+
     private static String urlDe(Path diretorio) {
         return "jdbc:sqlite:" + diretorio.resolve("studys.db") + "?foreign_keys=on&journal_mode=WAL&busy_timeout=5000";
     }

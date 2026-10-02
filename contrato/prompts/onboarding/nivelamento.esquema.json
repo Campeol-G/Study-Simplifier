@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://studys.app/contrato/onboarding/nivelamento.esquema.json",
+  "title": "Saida da etapa de nivelamento",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["perguntas", "resultado"],
+  "properties": {
+    "perguntas": {
+      "description": "Ate 3 perguntas de sondagem, na ordem. Vazia quando a entrada ja basta para decidir — por isso nao ha minItems aqui.",
+      "type": "array",
+      "maxItems": 3,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "resultado": {
+      "description": "null enquanto houver pergunta sem resposta.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nivel", "justificativa"],
+          "properties": {
+            "nivel": { "enum": ["iniciante", "intermediario", "avancado"] },
+            "justificativa": { "type": "string", "minLength": 1, "maxLength": 300 }
+          }
+        }
+      ]
+    }
+  }
+}

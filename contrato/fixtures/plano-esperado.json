@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "origem": "web-ai",
+  "criadoEm": "2026-10-01T12:00:00Z",
+  "assunto": "Python para automatizar planilhas",
+  "nivel": "iniciante",
+  "meta": { "horasPorSemana": 5, "duracaoSemanas": 12 },
+  "nos": [
+    {
+      "id": "python-para-automatizar-planilhas",
+      "paiId": null,
+      "tipo": "MATERIA",
+      "titulo": "Python para automatizar planilhas",
+      "ordem": 0,
+      "nivelDominio": 0,
+      "status": "TODO",
+      "slug": "python-para-automatizar-planilhas"
+    },
+    {
+      "id": "python-para-automatizar-planilhas/fundamentos-da-linguagem",
+      "paiId": "python-para-automatizar-planilhas",
+      "tipo": "CAPITULO",
+      "titulo": "Fundamentos da linguagem",
+      "ordem": 0,
+      "nivelDominio": 0,
+      "status": "TODO",
+      "slug": "fundamentos-da-linguagem"
+    },
+    {
+      "id": "python-para-automatizar-planilhas/fundamentos-da-linguagem/valores-e-tipos",
+      "paiId": "python-para-automatizar-planilhas/fundamentos-da-linguagem",
+      "tipo": "TOPICO",
+      "titulo": "Valores e tipos",
+      "ordem": 0,
+      "nivelDominio": 0,
+      "status": "TODO",
+      "slug": "valores-e-tipos"
+    },
+    {
+      "id": "python-para-automatizar-planilhas/fundamentos-da-linguagem/funcoes",
+      "paiId": "python-para-automatizar-planilhas/fundamentos-da-linguagem",
+      "tipo": "TOPICO",
+      "titulo": "Funções",
+      "ordem": 1,
+      "nivelDominio": 0,
+      "status": "TODO",
+      "slug": "funcoes"
+    },
+    {
+      "id": "python-para-automatizar-planilhas/leitura-e-escrita-de-arquivos",
+      "paiId": "python-para-automatizar-planilhas",
+      "tipo": "CAPITULO",
+      "titulo": "Leitura e escrita de arquivos",
+      "ordem": 1,
+      "nivelDominio": 0,
+      "status": "TODO",
+      "slug": "leitura-e-escrita-de-arquivos"
+    },
+    {
+      "id": "python-para-automatizar-planilhas/leitura-e-escrita-de-arquivos/csv-com-o-modulo-csv",
+      "paiId": "python-para-automatizar-planilhas/leitura-e-escrita-de-arquivos",
+      "tipo": "TOPICO",
+      "titulo": "CSV com o módulo csv",
+      "ordem": 0,
+      "nivelDominio": 0,
+      "status": "TODO",
+      "slug": "csv-com-o-modulo-csv"
+    }
+  ]
+}

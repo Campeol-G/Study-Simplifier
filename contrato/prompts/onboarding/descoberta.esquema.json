@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://studys.app/contrato/onboarding/descoberta.esquema.json",
+  "title": "Saida da etapa de descoberta",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["etapa", "obtido", "faltando", "pergunta"],
+  "properties": {
+    "etapa": {
+      "enum": ["descoberta", "concluida"]
+    },
+    "obtido": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "objetivo": { "type": "string", "minLength": 1 },
+        "assunto": { "type": "string", "minLength": 1 },
+        "horasPorSemana": { "type": "integer", "minimum": 1 },
+        "restricoes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "faltando": {
+      "type": "array",
+      "items": { "enum": ["objetivo", "assunto", "horasPorSemana", "restricoes"] }
+    },
+    "pergunta": { "type": "string" }
+  }
+}

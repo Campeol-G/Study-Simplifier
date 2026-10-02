@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://studys.app/contrato/plan-generation/esquema-saida.json",
+  "title": "Saida do gerador de plano",
+  "description": "Auto-contido, sem $ref: e consumed direto por API de saida estruturada, que nao resolve referencias entre documentos. Os enums 'nivel' e 'tipo' sao os mesmos de plano.schema.json. 'id', 'slug', 'ordem', 'status' e 'nivelDominio' ficam de fora de proposito, porque o StudyS os deriva ao percorrer a arvore. A hierarquia e aninhada porque aninhamento expressa a hierarquia com uma chave a menos: o paiId sai de o caminho.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nivel", "meta", "nos"],
+  "properties": {
+    "nivel": {
+      "description": "Copiado da entrada do onboarding.",
+      "enum": ["iniciante", "intermediario", "avancado"]
+    },
+    "meta": {
+      "description": "Copiada da entrada do onboarding, sem recalcular.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["horasPorSemana", "duracaoSemanas"],
+      "properties": {
+        "horasPorSemana": { "type": "integer", "minimum": 1 },
+        "duracaoSemanas": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "nos": {
+      "description": "Exatamente uma MATERIA na raiz; os filhos sao CAPITULOs, os netos TOPICOs e os bisnetos AULAs.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tipo", "titulo", "filhos"],
+        "properties": {
+          "tipo": { "enum": ["MATERIA", "CAPITULO", "TOPICO", "AULA"] },
+          "titulo": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "filhos": {
+            "description": "Capitulos da materia.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["tipo", "titulo", "filhos"],
+              "properties": {
+                "tipo": { "enum": ["MATERIA", "CAPITULO", "TOPICO", "AULA"] },
+                "titulo": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "filhos": {
+                  "description": "Topicos do capitulo.",
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["tipo", "titulo", "filhos"],
+                    "properties": {
+                      "tipo": { "enum": ["MATERIA", "CAPITULO", "TOPICO", "AULA"] },
+                      "titulo": { "type": "string", "minLength": 1, "maxLength": 200 },
+                      "filhos": {
+                        "description": "Aulas do topico. Lista pode ser vazia; quando nao for, so contem AULA.",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["tipo", "titulo", "filhos"],
+                          "properties": {
+                            "tipo": { "enum": ["MATERIA", "CAPITULO", "TOPICO", "AULA"] },
+                            "titulo": { "type": "string", "minLength": 1, "maxLength": 200 },
+                            "filhos": {
+                              "description": "Sempre vazia: AULA e o ultimo nivel da arvore.",
+                              "type": "array",
+                              "maxItems": 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

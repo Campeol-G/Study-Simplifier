@@ -1,0 +1,33 @@
+Claro! Aqui está a hierarquia do plano para "Python para automatizar planilhas":
+
+```json
+{
+  "nivel": "iniciante",
+  "meta": { "horasPorSemana": 5, "duracaoSemanas": 12 },
+  "nos": [
+    {
+      "tipo": "MATERIA",
+      "titulo": "Python para automatizar planilhas",
+      "filhos": [
+        {
+          "tipo": "CAPITULO",
+          "titulo": "Fundamentos da linguagem",
+          "filhos": [
+            { "tipo": "TOPICO", "titulo": "Valores e tipos", "filhos": [] },
+            { "tipo": "TOPICO", "titulo": "Funções", "filhos": [], "exemplo": "def dobro(x): return x * 2" },
+          ]
+        },
+        {
+          "tipo": "CAPITULO",
+          "titulo": "Leitura e escrita de arquivos",
+          "filhos": [
+            { "tipo": "LEITURA", "titulo": "CSV com o módulo csv", "filhos": [] },
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+Espero que ajude!

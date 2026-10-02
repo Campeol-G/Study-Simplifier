@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://studys.app/contrato/content-generation/questoes.esquema.json",
+  "title": "Saida da etapa de questoes",
+  "description": "Auto-contido, sem $ref: e consumed direto por API de saida estruturada. 'tipo' fica fixo em QUESTIONS porque a etapa determina o tipo; o enum completo e o mesmo de plano.schema.json em nos[].conteudo.tipo.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tipo", "texto", "fontes"],
+  "properties": {
+    "tipo": { "const": "QUESTIONS" },
+    "texto": { "type": "string", "minLength": 1 },
+    "fontes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://studys.app/contrato/onboarding/conclusao.esquema.json",
+  "title": "Saida da conclusao do onboarding: entrada do gerador de plano",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assunto", "nivel", "meta", "restricoes"],
+  "properties": {
+    "assunto": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "nivel": { "enum": ["iniciante", "intermediario", "avancado"] },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["horasPorSemana", "duracaoSemanas"],
+      "properties": {
+        "horasPorSemana": { "type": "integer", "minimum": 1 },
+        "duracaoSemanas": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "restricoes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

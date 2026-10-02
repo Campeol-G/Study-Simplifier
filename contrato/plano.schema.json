@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://studys.app/contrato/plano.schema.json",
+  "title": "Plano de estudo normalizado",
+  "description": "Arquivo trocado entre o StudyS desktop (Java/SQLite) e o StudyS web (TypeScript/estatico). Espelha o modelo persistido em plan_nodes, com ids derivados de caminho para tornar a importacao idempotente.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "origem", "criadoEm", "assunto", "nivel", "meta", "nos"],
+  "properties": {
+    "schemaVersion": {
+      "description": "Versao deste formato. Mudanca = schema novo e migracao explicita no consumidor; um plano com versao desconhecida nao pode ser importado.",
+      "const": 1
+    },
+    "origem": {
+      "description": "Quem produziu o arquivo.",
+      "enum": ["web-ai", "web-script", "desktop"]
+    },
+    "criadoEm": {
+      "description": "Instante de geracao do plano, em UTC.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "assunto": {
+      "description": "O que o usuario quer aprender. Igual a coluna plans.assunto.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "nivel": {
+      "description": "Nivel de partida definido no nivelamento.",
+      "enum": ["iniciante", "intermediario", "avancado"]
+    },
+    "meta": {
+      "description": "Orcamento de estudo que dimensionou o plano.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["horasPorSemana", "duracaoSemanas"],
+      "properties": {
+        "horasPorSemana": {
+          "description": "Horas por semana que o usuario pode dedicar.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "duracaoSemanas": {
+          "description": "Quantas semanas o plano deve cobrir.",
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "nos": {
+      "description": "Todos os nos do plano, em qualquer ordem: a hierarquia e expressa por paiId, nao por aninhamento.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "paiId", "tipo", "titulo", "ordem", "nivelDominio", "status", "slug"],
+        "properties": {
+          "id": {
+            "description": "Id de caminho. A raiz tem id == slug; os demais tem id == paiId + '/' + slug.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "paiId": {
+            "description": "Id do no pai. null apenas no no raiz.",
+            "type": ["string", "null"]
+          },
+          "tipo": {
+            "description": "Espelha com.studys.schemas.plan.PlanNodeType.",
+            "enum": ["MATERIA", "CAPITULO", "TOPICO", "AULA"]
+          },
+          "titulo": {
+            "description": "Rotulo exibido. Igual a coluna plan_nodes.titulo.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "ordem": {
+            "description": "Posicao entre os irmaos, contada a partir de 0. Unica entre irmaos.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "nivelDominio": {
+            "description": "Nivel de dominio requerido pelo no. today the engine writes 0 for every node; the contract does not cap it because no producer varies it yet.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "status": {
+            "description": "Espelha com.studys.schemas.plan.PlanNodeStatus. Todo plano novo nasce com TODO.",
+            "enum": ["TODO", "IN_PROGRESS", "DONE", "SKIPPED"]
+          },
+          "slug": {
+            "description": "Ultimo segmento do id. minusculas, sem acento.",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "maxLength": 255
+          },
+          "conteudo": {
+            "description": "Conteudo gerado para o no. Ausente enquanto o no nao foi gerado: o web gera o do primeiro topico como amostra, o desktop gera o resto.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["tipo", "texto"],
+            "properties": {
+              "tipo": {
+                "description": "Espelha com.studys.schemas.content.ContentType.",
+                "enum": ["THEORY", "QUESTIONS", "PROJECT"]
+              },
+              "texto": {
+                "description": "Corpo do conteudo, em markdown.",
+                "type": "string",
+                "minLength": 1
+              },
+              "fontes": {
+                "description": "Referencias usadas na geracao. Lista vazia quando nao houver.",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "recursos": {
+            "description": "Materiais externos do no. Ausente quando o no nao tiver nenhum.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["tipo", "url", "titulo"],
+              "properties": {
+                "tipo": {
+                  "description": "Espelha com.studys.schemas.content.ResourceType.",
+                  "enum": ["VIDEO", "ARTIGO", "SITE"]
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "maxLength": 1024
+                },
+                "titulo": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

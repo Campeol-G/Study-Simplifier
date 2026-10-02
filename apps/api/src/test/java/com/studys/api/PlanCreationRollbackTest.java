@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,10 +52,13 @@ class PlanCreationRollbackTest {
         doThrow(new IllegalStateException("engine fora do ar")).when(engine).gerarArvoreEstatica(any(UUID.class));
 
         try {
-            assertThatThrownBy(() -> mvc.perform(post("/plans")
+            // A partir da Fase 3 a excecao nao atravessa mais o MockMvc: o handler generico de
+            // Exception devolve 500. O que este teste prova continua sendo o rollback, entao o
+            // "a requisicao falhou" passa a ser verificado pelo status, e nao por "algo foi lancado".
+            mvc.perform(post("/plans")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(json.writeValueAsString(Map.of("assunto", "Rollback", "descricao", "sem arvore")))))
-                    .hasRootCauseInstanceOf(IllegalStateException.class);
+                            .content(json.writeValueAsString(Map.of("assunto", "Rollback", "descricao", "sem arvore"))))
+                    .andExpect(status().isInternalServerError());
 
             assertThat(plans.count()).as("o plano nao pode sobrar sem a arvore").isEqualTo(antes);
         } finally {

@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Banco SQLite local ###
+# *.db-wal e *.db-shm existem por causa do PRAGMA journal_mode=WAL
+*.db
+*.db-shm
+*.db-wal
+*.db-journal

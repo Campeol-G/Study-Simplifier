@@ -7,7 +7,6 @@ import com.studys.schemas.plan.PlanNodeStatusRequest;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +27,7 @@ public class PlanNodeController {
     public ResponseEntity<PlanNodeResponse> atualizarStatus(@PathVariable UUID planId, @PathVariable UUID nodeId,
             @RequestBody PlanNodeStatusRequest request) {
         PlanNodeStatus status = lerStatus(request);
-        return ResponseEntity.ok(engine.atualizarStatusNode(usuarioAtual(), planId, nodeId, status));
+        return ResponseEntity.ok(engine.atualizarStatusNode(planId, nodeId, status));
     }
 
     // Status de no nao tem rotulo (o cliente manda o nome do enum), por isso o parse e direto aqui, sem o
@@ -39,9 +38,5 @@ public class PlanNodeController {
             throw new IllegalArgumentException("Status é obrigatório");
         }
         return PlanNodeStatus.valueOf(status.trim().toUpperCase(Locale.ROOT));
-    }
-
-    private UUID usuarioAtual() {
-        return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 }

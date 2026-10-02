@@ -51,10 +51,9 @@ public class PlanEngineService {
     }
 
     @Transactional
-    public PlanNodeResponse atualizarStatusNode(UUID userId, UUID planId, UUID nodeId, PlanNodeStatus novoStatus) {
+    public PlanNodeResponse atualizarStatusNode(UUID planId, UUID nodeId, PlanNodeStatus novoStatus) {
         PlanNodeEntity node = nodes.findById(nodeId)
                 .filter(n -> n.getPlan().getId().equals(planId))
-                .filter(n -> n.getPlan().getUser().getId().equals(userId))
                 .orElseThrow(() -> new NodePlanoNaoEncontradoException("Nó do plano não encontrado"));
         node.setStatus(novoStatus.name());
         return toResponse(nodes.save(node));

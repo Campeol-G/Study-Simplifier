@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.studys.db.repository.PlanRepository;
-import com.studys.db.repository.UserRepository;
 import com.studys.planengine.PlanEngineService;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -24,6 +23,13 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Rollback transacional de "plano + arvore": o teste mais valioso da suite, e por isso o unico que
+ * nao e {@code @Transactional}. Se estivesse transacional, o rollback do proprio teste mascararia
+ * exatamente o que ele quer provar.
+ *
+ * <p>A limpeza no {@code finally} tambem e manual, pela mesma razao.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class PlanCreationRollbackTest {
@@ -37,42 +43,24 @@ class PlanCreationRollbackTest {
     @Autowired
     private PlanRepository plans;
 
-    @Autowired
-    private UserRepository users;
-
     @MockitoBean
     private PlanEngineService engine;
 
     @Test
     void falhaNaEngineNaoDeixaPlanoSemArvore() throws Exception {
-        String email = "rollback-" + UUID.randomUUID() + "@teste.com";
-        MvcResult registro = mvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("nome", "Teste", "email", email, "senha", "segredo123"))))
-                .andExpect(status().isCreated())
-                .andReturn();
-        JsonNode user = json.readTree(registro.getResponse().getContentAsString());
-        UUID userId = UUID.fromString(user.get("id").asText());
-
-        MvcResult login = mvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("email", email, "senha", "segredo123"))))
-                .andExpect(status().isOk())
-                .andReturn();
-        String token = json.readTree(login.getResponse().getContentAsString()).get("token").asText();
+        long antes = plans.count();
 
         doThrow(new IllegalStateException("engine fora do ar")).when(engine).gerarArvoreEstatica(any(UUID.class));
 
         try {
             assertThatThrownBy(() -> mvc.perform(post("/plans")
-                            .header("Authorization", "Bearer " + token)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json.writeValueAsString(Map.of("assunto", "Rollback", "descricao", "sem arvore")))))
                     .hasRootCauseInstanceOf(IllegalStateException.class);
 
-            assertThat(plans.findByUserId(userId)).isEmpty();
+            assertThat(plans.count()).as("o plano nao pode sobrar sem a arvore").isEqualTo(antes);
         } finally {
-            users.deleteById(userId);
+            plans.deleteAll();
         }
     }
 }

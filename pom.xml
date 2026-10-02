@@ -28,7 +28,6 @@
 		<module>services/plan-engine</module>
 		<module>services/content-generation</module>
 		<module>services/onboarding-chat</module>
-		<module>services/identity</module>
 		<module>services/plans</module>
 		<module>apps/api</module>
 	</modules>

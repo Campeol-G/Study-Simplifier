@@ -26,10 +26,6 @@ public class AttemptEntity {
     @JoinColumn(name = "plan_node_id", nullable = false)
     private PlanNodeEntity planNode;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
-
     @Column(name = "pontuacao")
     private Double pontuacao;
 
@@ -39,9 +35,8 @@ public class AttemptEntity {
     protected AttemptEntity() {
     }
 
-    public AttemptEntity(PlanNodeEntity planNode, UserEntity user, Double pontuacao) {
+    public AttemptEntity(PlanNodeEntity planNode, Double pontuacao) {
         this.planNode = planNode;
-        this.user = user;
         this.pontuacao = pontuacao;
         this.concluidoEm = Instant.now();
     }
@@ -52,10 +47,6 @@ public class AttemptEntity {
 
     public PlanNodeEntity getPlanNode() {
         return planNode;
-    }
-
-    public UserEntity getUser() {
-        return user;
     }
 
     public Double getPontuacao() {

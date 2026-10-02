@@ -31,47 +31,9 @@ class PlanNodeFlowTest {
     @Autowired
     private ObjectMapper json;
 
-    private String registrar(String email) throws Exception {
-        mvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("nome", "Teste", "email", email, "senha", "segredo123"))))
-                .andExpect(status().isCreated());
-        return logar(email);
-    }
-
-    private String logar(String email) throws Exception {
-        MvcResult r = mvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("email", email, "senha", "segredo123"))))
-                .andExpect(status().isOk())
-                .andReturn();
-        return json.readTree(r.getResponse().getContentAsString()).get("token").asText();
-    }
-
-    private JsonNode criarPlano(String token, String assunto) throws Exception {
-        MvcResult r = mvc.perform(post("/plans")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("assunto", assunto, "descricao", "Do zero"))))
-                .andExpect(status().isCreated())
-                .andReturn();
-        return json.readTree(r.getResponse().getContentAsString());
-    }
-
-    private String primeiroTopico(JsonNode plano) {
-        for (JsonNode node : plano.get("nodes")) {
-            if (node.get("tipo").asText().equals("TOPICO")) {
-                return node.get("id").asText();
-            }
-        }
-        throw new IllegalStateException("Nenhum TOPICO na arvore");
-    }
-
     @Test
     void criarPlanoGeraArvoreEstatica() throws Exception {
-        String token = registrar("arvore-" + UUID.randomUUID() + "@teste.com");
-
-        JsonNode plano = criarPlano(token, "Java");
+        JsonNode plano = criarPlano("Java");
         String planId = plano.get("id").asText();
         JsonNode nodes = plano.get("nodes");
 
@@ -99,16 +61,15 @@ class PlanNodeFlowTest {
 
     @Test
     void listarEBuscarDevolvemOsNosReais() throws Exception {
-        String token = registrar("leitura-" + UUID.randomUUID() + "@teste.com");
-        String planId = criarPlano(token, "Spring").get("id").asText();
+        String planId = criarPlano("Spring").get("id").asText();
 
-        MvcResult lista = mvc.perform(get("/plans").header("Authorization", "Bearer " + token))
+        MvcResult lista = mvc.perform(get("/plans"))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode doLista = json.readTree(lista.getResponse().getContentAsString()).get(0);
         assertThat(doLista.get("nodes").size()).isEqualTo(4);
 
-        MvcResult busca = mvc.perform(get("/plans/" + planId).header("Authorization", "Bearer " + token))
+        MvcResult busca = mvc.perform(get("/plans/" + planId))
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(json.readTree(busca.getResponse().getContentAsString()).get("nodes").size()).isEqualTo(4);
@@ -116,13 +77,11 @@ class PlanNodeFlowTest {
 
     @Test
     void atualizarStatusDoNoAceitaNomeDoEnum() throws Exception {
-        String token = registrar("status-" + UUID.randomUUID() + "@teste.com");
-        JsonNode plano = criarPlano(token, "Banco de dados");
+        JsonNode plano = criarPlano("Banco de dados");
         String planId = plano.get("id").asText();
         String nodeId = primeiroTopico(plano);
 
         MvcResult atualizado = mvc.perform(patch("/plans/" + planId + "/nodes/" + nodeId)
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("status", "DONE"))))
                 .andExpect(status().isOk())
@@ -132,7 +91,6 @@ class PlanNodeFlowTest {
         assertThat(node.get("status").asText()).isEqualTo("DONE");
 
         MvcResult minusculo = mvc.perform(patch("/plans/" + planId + "/nodes/" + nodeId)
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("status", "done"))))
                 .andExpect(status().isOk())
@@ -140,7 +98,7 @@ class PlanNodeFlowTest {
         assertThat(json.readTree(minusculo.getResponse().getContentAsString()).get("status").asText())
                 .isEqualTo("DONE");
 
-        MvcResult busca = mvc.perform(get("/plans/" + planId).header("Authorization", "Bearer " + token))
+        MvcResult busca = mvc.perform(get("/plans/" + planId))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode nodes = json.readTree(busca.getResponse().getContentAsString()).get("nodes");
@@ -150,54 +108,62 @@ class PlanNodeFlowTest {
 
     @Test
     void statusInvalidoOuAusenteRetorna400() throws Exception {
-        String token = registrar("invalido-" + UUID.randomUUID() + "@teste.com");
-        JsonNode plano = criarPlano(token, "Go");
+        JsonNode plano = criarPlano("Go");
         String planId = plano.get("id").asText();
         String nodeId = primeiroTopico(plano);
 
         mvc.perform(patch("/plans/" + planId + "/nodes/" + nodeId)
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("status", "explodindo"))))
                 .andExpect(status().isBadRequest());
 
         mvc.perform(patch("/plans/" + planId + "/nodes/" + nodeId)
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of())))
                 .andExpect(status().isBadRequest());
     }
 
+    /**
+     * Sem tabela users nao existe o cenario "no de outro usuario": todo no pertence a quem esta
+     * usando o app. O que sobra e o no de outro plano, que continua 404.
+     */
     @Test
-    void noDeOutroUsuarioRetorna404() throws Exception {
-        String tokenA = registrar("dono-" + UUID.randomUUID() + "@teste.com");
-        String tokenB = registrar("bisnipa-" + UUID.randomUUID() + "@teste.com");
-        JsonNode planoA = criarPlano(tokenA, "Rust");
-        String planIdA = planoA.get("id").asText();
-        String nodeIdA = primeiroTopico(planoA);
-        String planIdB = criarPlano(tokenB, "Zig").get("id").asText();
-
-        mvc.perform(patch("/plans/" + planIdA + "/nodes/" + nodeIdA)
-                        .header("Authorization", "Bearer " + tokenB)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("status", "DONE"))))
-                .andExpect(status().isNotFound());
+    void noDeOutroPlanoRetorna404() throws Exception {
+        String planIdA = criarPlano("Rust").get("id").asText();
+        String nodeIdA = primeiroTopico(buscarPlano(planIdA));
+        String planIdB = criarPlano("Zig").get("id").asText();
 
         mvc.perform(patch("/plans/" + planIdB + "/nodes/" + nodeIdA)
-                        .header("Authorization", "Bearer " + tokenB)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("status", "DONE"))))
                 .andExpect(status().isNotFound());
 
         mvc.perform(patch("/plans/" + planIdA + "/nodes/" + UUID.randomUUID())
-                        .header("Authorization", "Bearer " + tokenA)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("status", "DONE"))))
                 .andExpect(status().isNotFound());
+    }
 
-        mvc.perform(patch("/plans/" + planIdA + "/nodes/" + nodeIdA)
+    private JsonNode buscarPlano(String planId) throws Exception {
+        MvcResult r = mvc.perform(get("/plans/" + planId)).andExpect(status().isOk()).andReturn();
+        return json.readTree(r.getResponse().getContentAsString());
+    }
+
+    private JsonNode criarPlano(String assunto) throws Exception {
+        MvcResult r = mvc.perform(post("/plans")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("status", "DONE"))))
-                .andExpect(status().isUnauthorized());
+                        .content(json.writeValueAsString(Map.of("assunto", assunto, "descricao", "Do zero"))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return json.readTree(r.getResponse().getContentAsString());
+    }
+
+    private String primeiroTopico(JsonNode plano) {
+        for (JsonNode node : plano.get("nodes")) {
+            if (node.get("tipo").asText().equals("TOPICO")) {
+                return node.get("id").asText();
+            }
+        }
+        throw new IllegalStateException("Nenhum TOPICO na arvore");
     }
 }

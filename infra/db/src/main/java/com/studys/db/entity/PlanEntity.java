@@ -2,15 +2,14 @@ package com.studys.db.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "plans")
@@ -22,17 +21,14 @@ public class PlanEntity {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
-
     @Column(name = "assunto", nullable = false, length = 200)
     private String assunto;
 
     @Column(name = "status", nullable = false, length = 30)
     private String status;
 
-    @Column(name = "descricao", columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "descricao")
     private String descricao;
 
     @Column(name = "criado_em", nullable = false)
@@ -41,8 +37,7 @@ public class PlanEntity {
     protected PlanEntity() {
     }
 
-    public PlanEntity(UserEntity user, String assunto, String status) {
-        this.user = user;
+    public PlanEntity(String assunto, String status) {
         this.assunto = assunto;
         this.status = status;
         this.criadoEm = Instant.now();
@@ -50,10 +45,6 @@ public class PlanEntity {
 
     public UUID getId() {
         return id;
-    }
-
-    public UserEntity getUser() {
-        return user;
     }
 
     public String getAssunto() {

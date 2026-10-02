@@ -45,7 +45,7 @@ public class PlanNodeEntity {
     @Column(name = "ordem", nullable = false)
     private int ordem;
 
-    @Column(name = "tipo", length = 30)
+    @Column(name = "tipo", nullable = false, length = 30)
     private String tipo;
 
     @Column(name = "criado_em", nullable = false)

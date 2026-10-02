@@ -11,6 +11,8 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "resources")
@@ -35,7 +37,8 @@ public class ResourceEntity {
     @Column(name = "titulo", nullable = false, length = 255)
     private String titulo;
 
-    @Column(name = "descricao", columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "descricao")
     private String descricao;
 
     @Column(name = "thumbnail_url", length = 1024)

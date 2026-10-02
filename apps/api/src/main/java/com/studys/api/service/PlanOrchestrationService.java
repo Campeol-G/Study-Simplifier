@@ -20,9 +20,9 @@ public class PlanOrchestrationService {
     }
 
     @Transactional
-    public PlanResponse criarComArvore(UUID userId, PlanRequest request) {
-        PlanResponse criado = plans.criar(userId, request);
+    public PlanResponse criarComArvore(PlanRequest request) {
+        PlanResponse criado = plans.criar(request);
         engine.gerarArvoreEstatica(criado.getId());
-        return plans.buscar(userId, criado.getId());
+        return plans.buscar(criado.getId());
     }
 }

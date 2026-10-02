@@ -9,7 +9,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +32,7 @@ public class PlanController {
 
     @PostMapping
     public ResponseEntity<PlanResponse> criar(@RequestBody PlanRequest request) {
-        PlanResponse criado = orchestrator.criarComArvore(usuarioAtual(), request);
+        PlanResponse criado = orchestrator.criarComArvore(request);
         URI localizacao = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(criado.getId())
@@ -43,21 +42,17 @@ public class PlanController {
 
     @GetMapping
     public ResponseEntity<List<PlanResponse>> listar() {
-        return ResponseEntity.ok(plans.listar(usuarioAtual()));
+        return ResponseEntity.ok(plans.listar());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlanResponse> buscar(@PathVariable UUID id) {
-        return ResponseEntity.ok(plans.buscar(usuarioAtual(), id));
+        return ResponseEntity.ok(plans.buscar(id));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<PlanResponse> atualizarStatus(@PathVariable UUID id, @RequestBody PlanStatusRequest request) {
         String status = request == null ? null : request.getStatus();
-        return ResponseEntity.ok(plans.atualizarStatus(usuarioAtual(), id, status));
-    }
-
-    private UUID usuarioAtual() {
-        return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+        return ResponseEntity.ok(plans.atualizarStatus(id, status));
     }
 }

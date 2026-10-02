@@ -8,6 +8,8 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "content_cache")
@@ -25,10 +27,12 @@ public class ContentCacheEntity {
     @Column(name = "tipo", nullable = false, length = 30)
     private String tipo;
 
-    @Column(name = "conteudo", nullable = false, columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "conteudo", nullable = false)
     private String conteudo;
 
-    @Column(name = "fontes", columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "fontes")
     private String fontes;
 
     @Column(name = "atualizado_em", nullable = false)

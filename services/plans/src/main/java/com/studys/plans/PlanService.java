@@ -2,10 +2,8 @@ package com.studys.plans;
 
 import com.studys.db.entity.PlanEntity;
 import com.studys.db.entity.PlanNodeEntity;
-import com.studys.db.entity.UserEntity;
 import com.studys.db.repository.PlanNodeRepository;
 import com.studys.db.repository.PlanRepository;
-import com.studys.db.repository.UserRepository;
 import com.studys.schemas.plan.PlanNodeResponse;
 import com.studys.schemas.plan.PlanNodeStatus;
 import com.studys.schemas.plan.PlanNodeType;
@@ -21,53 +19,45 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlanService {
 
     private final PlanRepository plans;
-    private final UserRepository users;
     private final PlanNodeRepository nodes;
 
-    public PlanService(PlanRepository plans, UserRepository users, PlanNodeRepository nodes) {
+    public PlanService(PlanRepository plans, PlanNodeRepository nodes) {
         this.plans = plans;
-        this.users = users;
         this.nodes = nodes;
     }
 
     @Transactional
-    public PlanResponse criar(UUID userId, PlanRequest request) {
+    public PlanResponse criar(PlanRequest request) {
         String assunto = request.getAssunto() == null || request.getAssunto().isBlank()
                 ? null
                 : request.getAssunto().trim();
         if (assunto == null) {
             throw new IllegalArgumentException("Assunto é obrigatório");
         }
-        UserEntity user = users.findById(userId)
-                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário autenticado não encontrado"));
-        PlanEntity plan = new PlanEntity(user, assunto, PlanStatus.ACTIVE.name());
+        PlanEntity plan = new PlanEntity(assunto, PlanStatus.ACTIVE.name());
         plan.setDescricao(request.getDescricao());
         return toResponse(plans.save(plan));
     }
 
     @Transactional(readOnly = true)
-    public List<PlanResponse> listar(UUID userId) {
-        return plans.findByUserIdOrderByCriadoEmDesc(userId).stream()
+    public List<PlanResponse> listar() {
+        return plans.findAllByOrderByCriadoEmDesc().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public PlanResponse buscar(UUID userId, UUID planId) {
-        return toResponse(buscarOuFalhar(userId, planId));
+    public PlanResponse buscar(UUID planId) {
+        return toResponse(plans.findById(planId)
+                .orElseThrow(() -> new PlanoNaoEncontradoException("Plano não encontrado")));
     }
 
     @Transactional
-    public PlanResponse atualizarStatus(UUID userId, UUID planId, String rotulo) {
-        PlanEntity plan = buscarOuFalhar(userId, planId);
+    public PlanResponse atualizarStatus(UUID planId, String rotulo) {
+        PlanEntity plan = plans.findById(planId)
+                .orElseThrow(() -> new PlanoNaoEncontradoException("Plano não encontrado"));
         plan.setStatus(PlanStatusMapper.fromRotulo(rotulo).name());
         return toResponse(plans.save(plan));
-    }
-
-    private PlanEntity buscarOuFalhar(UUID userId, UUID planId) {
-        return plans.findById(planId)
-                .filter(p -> p.getUser().getId().equals(userId))
-                .orElseThrow(() -> new PlanoNaoEncontradoException("Plano não encontrado"));
     }
 
     private PlanResponse toResponse(PlanEntity plan) {

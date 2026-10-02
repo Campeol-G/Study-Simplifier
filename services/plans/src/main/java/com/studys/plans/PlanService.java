@@ -1,10 +1,14 @@
 package com.studys.plans;
 
 import com.studys.db.entity.PlanEntity;
+import com.studys.db.entity.PlanNodeEntity;
 import com.studys.db.entity.UserEntity;
+import com.studys.db.repository.PlanNodeRepository;
 import com.studys.db.repository.PlanRepository;
 import com.studys.db.repository.UserRepository;
 import com.studys.schemas.plan.PlanNodeResponse;
+import com.studys.schemas.plan.PlanNodeStatus;
+import com.studys.schemas.plan.PlanNodeType;
 import com.studys.schemas.plan.PlanRequest;
 import com.studys.schemas.plan.PlanResponse;
 import com.studys.schemas.plan.PlanStatus;
@@ -18,10 +22,12 @@ public class PlanService {
 
     private final PlanRepository plans;
     private final UserRepository users;
+    private final PlanNodeRepository nodes;
 
-    public PlanService(PlanRepository plans, UserRepository users) {
+    public PlanService(PlanRepository plans, UserRepository users, PlanNodeRepository nodes) {
         this.plans = plans;
         this.users = users;
+        this.nodes = nodes;
     }
 
     @Transactional
@@ -71,6 +77,20 @@ public class PlanService {
                 plan.getDescricao(),
                 PlanStatus.valueOf(plan.getStatus()),
                 plan.getCriadoEm(),
-                List.<PlanNodeResponse>of());
+                nodes.findByPlanIdOrderByOrdemAsc(plan.getId()).stream()
+                        .map(PlanService::toNodeResponse)
+                        .toList());
+    }
+
+    private static PlanNodeResponse toNodeResponse(PlanNodeEntity node) {
+        return new PlanNodeResponse(
+                node.getId(),
+                node.getTitulo(),
+                node.getSlug(),
+                PlanNodeType.valueOf(node.getTipo()),
+                PlanNodeStatus.valueOf(node.getStatus()),
+                node.getOrdem(),
+                node.getNivelDominio(),
+                node.getParent() == null ? null : node.getParent().getId());
     }
 }

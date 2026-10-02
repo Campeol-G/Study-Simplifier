@@ -1,5 +1,6 @@
 package com.studys.api.web;
 
+import com.studys.api.service.PlanOrchestrationService;
 import com.studys.plans.PlanService;
 import com.studys.schemas.plan.PlanRequest;
 import com.studys.schemas.plan.PlanResponse;
@@ -23,14 +24,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class PlanController {
 
     private final PlanService plans;
+    private final PlanOrchestrationService orchestrator;
 
-    public PlanController(PlanService plans) {
+    public PlanController(PlanService plans, PlanOrchestrationService orchestrator) {
         this.plans = plans;
+        this.orchestrator = orchestrator;
     }
 
     @PostMapping
     public ResponseEntity<PlanResponse> criar(@RequestBody PlanRequest request) {
-        PlanResponse criado = plans.criar(usuarioAtual(), request);
+        PlanResponse criado = orchestrator.criarComArvore(usuarioAtual(), request);
         URI localizacao = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(criado.getId())

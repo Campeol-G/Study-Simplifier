@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PlanNodeRepository extends JpaRepository<PlanNodeEntity, UUID> {
     List<PlanNodeEntity> findByPlanId(UUID planId);
 
+    List<PlanNodeEntity> findByPlanIdOrderByOrdemAsc(UUID planId);
+
     Optional<PlanNodeEntity> findBySlug(String slug);
 
     List<PlanNodeEntity> findByPlanIdAndParentIdOrderByOrdemAsc(UUID planId, UUID parentId);

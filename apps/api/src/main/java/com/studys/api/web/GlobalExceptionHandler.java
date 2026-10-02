@@ -3,6 +3,7 @@ package com.studys.api.web;
 import com.studys.identity.CredenciaisInvalidasException;
 import com.studys.identity.EmailEmUsoException;
 import com.studys.identity.TokenInvalidoException;
+import com.studys.planengine.NodePlanoNaoEncontradoException;
 import com.studys.plans.PlanoNaoEncontradoException;
 import com.studys.plans.StatusInvalidoException;
 import com.studys.plans.UsuarioNaoEncontradoException;
@@ -29,8 +30,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(Map.of("mensagem", e.getMessage()));
     }
 
-    @ExceptionHandler(PlanoNaoEncontradoException.class)
-    public ResponseEntity<Map<String, String>> naoEncontrado(PlanoNaoEncontradoException e) {
+    @ExceptionHandler({PlanoNaoEncontradoException.class, NodePlanoNaoEncontradoException.class})
+    public ResponseEntity<Map<String, String>> naoEncontrado(RuntimeException e) {
         return ResponseEntity.status(404).body(Map.of("mensagem", e.getMessage()));
     }
 

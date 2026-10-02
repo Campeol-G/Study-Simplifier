@@ -12,7 +12,7 @@
 
 	<artifactId>studys-plan-engine</artifactId>
 	<name>studys-plan-engine</name>
-	<description>Motor de plano: grafo de topicos, readaptacao</description>
+	<description>Motor de plano: arvore de nos e status (arvore hoje estatica, readaptacao nao implementada)</description>
 
 	<dependencies>
 		<dependency>

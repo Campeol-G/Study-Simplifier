@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = "com.studys.db.entity")
 public class StudySApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(StudySApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(StudySApplication.class, args);
+    }
 
 }

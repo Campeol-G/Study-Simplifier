@@ -12,7 +12,7 @@
 
 	<artifactId>studys-plans</artifactId>
 	<name>studys-plans</name>
-	<description>CRUD de planos com validacao de posse — sem web, sem HTTP</description>
+	<description>CRUD de planos — sem web, sem HTTP, sem autenticacao (usuario unico)</description>
 
 	<dependencies>
 		<dependency>

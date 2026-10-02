@@ -38,3 +38,16 @@ build/
 *.db-shm
 *.db-wal
 *.db-journal
+
+### Outros ###
+.DS_Store
+*.log
+
+### Documentos de trabalho (nao sao parte do produto) ###
+# AUDITORIA.txt: analise de 2026-09-28, anterior a esta refatoracao e ja em parte superada.
+# contexto.txt: contexto de conversa de desenvolvimento.
+AUDITORIA.txt
+*/AUDITORIA.txt
+contexto.txt
+PROMPT-*.md
+

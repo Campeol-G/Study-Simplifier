@@ -12,8 +12,8 @@ pronto e o que é promessa.
 ## Estado atual
 
 O que **funciona**: criar plano, listar, buscar, mudar o status do plano e o status de cada nó, com
-persistência em SQLite, migrations versionadas e uma suíte de 44 testes passando (17 de integração
-com o contexto Spring, mais testes de contrato e de esquema).
+persistência em SQLite, migrations versionadas e uma suíte de 51 testes passando (17 de integração
+com o contexto Spring, mais testes de contrato, de esquema e de entidade).
 
 O que **ainda não existe**, apesar de estar declarado no código:
 
@@ -50,12 +50,12 @@ são bibliotecas que precisam estar resolvidas para ela compilar.
 
 Endpoints (todos sem autenticação):
 
-| Método | Rota | O que faz |
-|---|---|---|
-| `POST` | `/plans` | cria um plano e a árvore de nós |
-| `GET` | `/plans` | lista os planos |
-| `GET` | `/plans/{id}` | busca um plano com seus nós |
-| `PATCH` | `/plans/{id}` | muda o status (`em andamento`, `pausado`, `concluído`) |
+| Método  | Rota                             | O que faz                                                      |
+| ------- | -------------------------------- | -------------------------------------------------------------- |
+| `POST`  | `/plans`                         | cria um plano e a árvore de nós                                |
+| `GET`   | `/plans`                         | lista os planos                                                |
+| `GET`   | `/plans/{id}`                    | busca um plano com seus nós                                    |
+| `PATCH` | `/plans/{id}`                    | muda o status (`em andamento`, `pausado`, `concluído`)         |
 | `PATCH` | `/plans/{planId}/nodes/{nodeId}` | muda o status do nó (`TODO`, `IN_PROGRESS`, `DONE`, `SKIPPED`) |
 
 Erro de cliente e de servidor respondem `{"mensagem": "..."}` no mesmo formato. Erro de servidor nunca
@@ -79,17 +79,17 @@ cópias: pode ignorá-los.
 Sete módulos Maven e duas pastas fora do build. `apps/` são executáveis, `services/` são regras de
 domínio, `shared/` é o que tudo compartilha e `infra/` é a base.
 
-| Módulo | O que faz |
-|---|---|
-| `shared/schemas` | contratos Java compartilhados (plano, nó, tentativa, conteúdo, chat) |
-| `infra/db` | entidades JPA, repositórios e a migration do SQLite; cria o diretório do banco |
-| `services/plans` | CRUD de planos, sem web e sem HTTP |
-| `services/plan-engine` | gera a árvore de nós e muda o status de um nó |
-| `services/content-generation` | declarado, **vazio**: geração de conteúdo a partir do cache |
-| `services/onboarding-chat` | declarado, **vazio**: conversa de descoberta e nivelamento |
-| `apps/api` | app Spring Boot executável: controllers, tratamento de erro, testes |
-| `contrato/` | contrato de dados entre desktop e web: schema do plano, prompts, fixtures |
-| `apps/web` | front React/Vite, protótipo, **fora** do Maven |
+| Módulo                        | O que faz                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| `shared/schemas`              | contratos Java compartilhados (plano, nó, tentativa, conteúdo, chat)           |
+| `infra/db`                    | entidades JPA, repositórios e a migration do SQLite; cria o diretório do banco |
+| `services/plans`              | CRUD de planos, sem web e sem HTTP                                             |
+| `services/plan-engine`        | gera a árvore de nós e muda o status de um nó                                  |
+| `services/content-generation` | declarado, **vazio**: geração de conteúdo a partir do cache                    |
+| `services/onboarding-chat`    | declarado, **vazio**: conversa de descoberta e nivelamento                     |
+| `apps/api`                    | app Spring Boot executável: controllers, tratamento de erro, testes            |
+| `contrato/`                   | contrato de dados entre desktop e web: schema do plano, prompts, fixtures      |
+| `apps/web`                    | front React/Vite, protótipo, **fora** do Maven                                 |
 
 `contrato/` é a fonte única do formato de plano e dos prompts de IA, compartilhada entre o desktop
 (Java) e a web (TypeScript). Está **congelado** a partir do commit que o criou: mudar qualquer

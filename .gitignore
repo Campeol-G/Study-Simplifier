@@ -44,10 +44,13 @@ build/
 *.log
 
 ### Documentos de trabalho (nao sao parte do produto) ###
-# AUDITORIA.txt: analise de 2026-09-28, anterior a esta refatoracao e ja em parte superada.
+# AUDITORIA.txt: analise de 2026-09-28, ja superada e removida do projeto.
 # contexto.txt: contexto de conversa de desenvolvimento.
-AUDITORIA.txt
-*/AUDITORIA.txt
+# infos.txt: estado do projeto em uma pagina, atualizado a mao.
+# NOTAS.md: memoria de projeto — decisoes com o porque, pendentes em ordem e ideias nao
+#   decididas. E o unico lugar onde uma ideia que ainda nao virou plano fica anotada, entao
+#   depende de sobreviver na maquina; nao vai para o repositorio.
 contexto.txt
 PROMPT-*.md
-
+infos.txt
+NOTAS.md

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { Link, NavLink } from "react-router-dom";
 import { useRoutePath } from "../lib/route";
 
 /** abas como pastas: ~/home  ~/about  ~/updates */
@@ -11,14 +10,6 @@ const TABS = [
 ];
 
 export function TopBar() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const onLogout = async () => {
-    await logout();
-    navigate("/", { replace: true });
-  };
-
   return (
     <header className="border-b border-zinc-800/70">
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 text-[13px]">
@@ -42,35 +33,6 @@ export function TopBar() {
             </NavLink>
           ))}
         </nav>
-
-        <div className="flex shrink-0 items-center gap-4">
-          {user ? (
-            <>
-              <span className="hidden max-w-32 truncate text-zinc-600 md:inline">
-                {user.email}
-              </span>
-              <button
-                type="button"
-                onClick={onLogout}
-                className="text-zinc-500 transition-colors hover:text-zinc-200"
-              >
-                ~/sair
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="text-zinc-500 transition-colors hover:text-zinc-200">
-                ~/login
-              </Link>
-              <Link
-                to="/register"
-                className="text-zinc-500 transition-colors hover:text-zinc-200"
-              >
-                ~/register
-              </Link>
-            </>
-          )}
-        </div>
       </div>
     </header>
   );
@@ -81,7 +43,7 @@ export function Rule() {
   return <div aria-hidden className="h-px bg-zinc-800/70" />;
 }
 
-/** moldura de terminal: usada nas telas de auth */
+/** moldura de terminal */
 export function TermFrame({
   path,
   children,

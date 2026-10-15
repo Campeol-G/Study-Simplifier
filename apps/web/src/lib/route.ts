@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 export function useRoutePath(): string {
   const { pathname } = useLocation();
   if (pathname === "/") return "~/home";
-  if (pathname === "/forgot") return "~/recover";
   if (pathname === "/app") return "~/app";
   return `~${pathname}`;
 }

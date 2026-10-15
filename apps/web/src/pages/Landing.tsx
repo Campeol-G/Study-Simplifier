@@ -4,14 +4,10 @@ import { Rule } from "../components/chrome";
 const INDEX = [
   { to: "/about", path: "~/about", desc: "o projeto, a stack e o estado atual" },
   { to: "/updates", path: "~/updates", desc: "o que mudou por último" },
-  { to: "/login", path: "~/login", desc: "entrar com uma conta" },
-  { to: "/register", path: "~/register", desc: "criar uma conta" },
-  { to: "/forgot", path: "~/recover", desc: "redefinir a senha" },
 ];
 
 const STATUS = [
   ["backend", "disconnected"],
-  ["auth", "localStorage"],
   ["branch", "feat/frontend"],
 ];
 
@@ -70,10 +66,6 @@ export function LandingPage() {
           ))}
         </dl>
       </div>
-
-      <p className="mt-16 text-xs leading-relaxed text-zinc-600">
-        auth 100% local por enquanto — nenhum dado sai do navegador.
-      </p>
     </div>
   );
 }

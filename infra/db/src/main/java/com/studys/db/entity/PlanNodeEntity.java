@@ -48,6 +48,9 @@ public class PlanNodeEntity {
     @Column(name = "tipo", nullable = false, length = 30)
     private String tipo;
 
+    @Column(name = "segundos_estudados", nullable = false)
+    private int segundosEstudados;
+
     @Column(name = "criado_em", nullable = false)
     private Instant criadoEm;
 
@@ -93,6 +96,14 @@ public class PlanNodeEntity {
 
     public void setNivelDominio(int nivelDominio) {
         this.nivelDominio = nivelDominio;
+    }
+
+    public int getSegundosEstudados() {
+        return segundosEstudados;
+    }
+
+    public void addSegundosEstudados(int segundos) {
+        this.segundosEstudados += segundos;
     }
 
     public String getStatus() {

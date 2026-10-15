@@ -43,5 +43,13 @@
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-community-dialects</artifactId>
 		</dependency>
+		<!-- As regras de negocio das entidades (creditar tempo, registrar progresso, fechar) sao
+		     testadas aqui, sem contexto Spring: sao metodos puros sobre o proprio objeto. O schema
+		     em si e provado em apps/api, que sobe Flyway e ddl-auto=validate de verdade. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

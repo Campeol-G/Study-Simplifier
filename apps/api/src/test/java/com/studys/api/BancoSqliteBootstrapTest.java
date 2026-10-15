@@ -66,7 +66,7 @@ class BancoSqliteBootstrapTest {
 
             List<String> tabelas = tabelas(urlDe(diretorio));
             assertThat(tabelas)
-                    .contains("plans", "plan_nodes", "attempts", "content_cache", "resources")
+                    .contains("plans", "plan_nodes", "attempts", "content_cache", "resources", "sessoes_estudo")
                     .as("a tabela users tem de ter sumido junto com a autenticacao")
                     .doesNotContain("users");
 
@@ -92,6 +92,29 @@ class BancoSqliteBootstrapTest {
                 .contains("nivel_inicial", "nivel_atual")
                 .as("orcamento que dimensionou o plano")
                 .contains("horas_por_semana", "duracao_semanas", "prazo_pedido_semanas", "restricoes");
+    }
+
+    @Test
+    @DisplayName("sessoes_estudo guarda o que foi contado, por que parou e quando houve progresso")
+    void tabelaDeSessoes() throws IOException {
+        Path diretorio = Path.of(System.getProperty("java.io.tmpdir"), "studys-v3-sessoes-" + UUID_QUALQUER);
+        apagar(diretorio);
+
+        try (ConfigurableApplicationContext contexto = novoContexto(diretorio)) {
+            assertThat(contexto.isRunning()).isTrue();
+        }
+
+        String url = urlDe(diretorio);
+        assertThat(colunas(url, "sessoes_estudo"))
+                .as("segundos_acumulados e o tempo creditado; motivo_fim diz por que a sessao parou")
+                .contains("id", "plan_node_id", "iniciada_em", "ultima_atividade_em", "ultimo_progresso_em",
+                        "segundos_acumulados", "motivo_fim")
+                .as("midia_ativa e o override: video rodando nunca pausa a contagem")
+                .contains("midia_ativa");
+
+        assertThat(colunas(url, "plan_nodes"))
+                .as("o total por no e a soma das sessoes; comeca em zero, sem backfill inventado")
+                .contains("segundos_estudados");
     }
 
     @Test

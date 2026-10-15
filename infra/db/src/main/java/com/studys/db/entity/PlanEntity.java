@@ -34,6 +34,25 @@ public class PlanEntity {
     @Column(name = "criado_em", nullable = false)
     private Instant criadoEm;
 
+    @Column(name = "nivel_inicial", length = 30)
+    private String nivelInicial;
+
+    @Column(name = "nivel_atual", length = 30)
+    private String nivelAtual;
+
+    @Column(name = "horas_por_semana")
+    private Integer horasPorSemana;
+
+    @Column(name = "duracao_semanas")
+    private Integer duracaoSemanas;
+
+    @Column(name = "prazo_pedido_semanas")
+    private Integer prazoPedidoSemanas;
+
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "restricoes")
+    private String restricoes;
+
     protected PlanEntity() {
     }
 
@@ -73,5 +92,53 @@ public class PlanEntity {
 
     public Instant getCriadoEm() {
         return criadoEm;
+    }
+
+    public String getNivelInicial() {
+        return nivelInicial;
+    }
+
+    public void setNivelInicial(String nivelInicial) {
+        this.nivelInicial = nivelInicial;
+    }
+
+    public String getNivelAtual() {
+        return nivelAtual;
+    }
+
+    public void setNivelAtual(String nivelAtual) {
+        this.nivelAtual = nivelAtual;
+    }
+
+    public Integer getHorasPorSemana() {
+        return horasPorSemana;
+    }
+
+    public void setHorasPorSemana(Integer horasPorSemana) {
+        this.horasPorSemana = horasPorSemana;
+    }
+
+    public Integer getDuracaoSemanas() {
+        return duracaoSemanas;
+    }
+
+    public void setDuracaoSemanas(Integer duracaoSemanas) {
+        this.duracaoSemanas = duracaoSemanas;
+    }
+
+    public Integer getPrazoPedidoSemanas() {
+        return prazoPedidoSemanas;
+    }
+
+    public void setPrazoPedidoSemanas(Integer prazoPedidoSemanas) {
+        this.prazoPedidoSemanas = prazoPedidoSemanas;
+    }
+
+    public String getRestricoes() {
+        return restricoes;
+    }
+
+    public void setRestricoes(String restricoes) {
+        this.restricoes = restricoes;
     }
 }

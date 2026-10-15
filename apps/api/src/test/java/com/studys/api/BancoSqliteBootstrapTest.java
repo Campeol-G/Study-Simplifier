@@ -77,6 +77,24 @@ class BancoSqliteBootstrapTest {
     }
 
     @Test
+    @DisplayName("o plano guarda nivel de partida e nivel atual, mais o orcamento do contrato v2")
+    void colunasDoPlanoV2() throws IOException {
+        Path diretorio = Path.of(System.getProperty("java.io.tmpdir"), "studys-v2-plano-" + UUID_QUALQUER);
+        apagar(diretorio);
+
+        try (ConfigurableApplicationContext contexto = novoContexto(diretorio)) {
+            assertThat(contexto.isRunning()).isTrue();
+        }
+
+        String url = urlDe(diretorio);
+        assertThat(colunas(url, "plans"))
+                .as("nivel_inicial e o registro imutavel do ponto de origem; nivel_atual e o que o produto mostra")
+                .contains("nivel_inicial", "nivel_atual")
+                .as("orcamento que dimensionou o plano")
+                .contains("horas_por_semana", "duracao_semanas", "prazo_pedido_semanas", "restricoes");
+    }
+
+    @Test
     @DisplayName("com foreign_keys ligado, inserir no com pai inexistente e recusado pelo banco")
     void chaveEstrangeiraAtiva() throws IOException {
         Path diretorio = Path.of(System.getProperty("java.io.tmpdir"), "studys-fk-" + UUID_QUALQUER);
@@ -122,9 +140,14 @@ class BancoSqliteBootstrapTest {
 
     @Test
     @DisplayName("o pool tem 1 conexao, como em producao: SQLite tem escritor unico")
-    void poolDeUmaConexao() {
-        try (ConfigurableApplicationContext contexto = novoContexto(
-                Path.of(System.getProperty("java.io.tmpdir"), "studys-pool-" + UUID_QUALQUER))) {
+    void poolDeUmaConexao() throws IOException {
+        // apagar antes: um banco deixado de uma rodada anterior carrega o Flyway com as migrations
+        // ja aplicadas, e ai a falha e de checksum em vez de falha de codigo — confuso de ler e
+        // esconderia erro novo de migration.
+        Path diretorio = Path.of(System.getProperty("java.io.tmpdir"), "studys-pool-" + UUID_QUALQUER);
+        apagar(diretorio);
+
+        try (ConfigurableApplicationContext contexto = novoContexto(diretorio)) {
             var dataSource = (com.zaxxer.hikari.HikariDataSource) contexto.getBean(javax.sql.DataSource.class);
             assertThat(dataSource.getMaximumPoolSize())
                     .as("SQLite tem escritor unico: mais de uma conexao concorrencia da SQLITE_BUSY")
@@ -148,6 +171,21 @@ class BancoSqliteBootstrapTest {
             return nomes;
         } catch (SQLException e) {
             throw new AssertionError("nao consegui ler o esquema de " + url + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static List<String> colunas(String url, String tabela) {
+        try (var conexao = DriverManager.getConnection(url);
+                var consulta = conexao.createStatement();
+                var resultado = consulta.executeQuery("PRAGMA table_info(" + tabela + ")")) {
+            List<String> nomes = new ArrayList<>();
+            while (resultado.next()) {
+                nomes.add(resultado.getString("name"));
+            }
+            return nomes;
+        } catch (SQLException e) {
+            throw new AssertionError(
+                    "nao consegui ler as colunas de " + tabela + " em " + url + ": " + e.getMessage(), e);
         }
     }
 

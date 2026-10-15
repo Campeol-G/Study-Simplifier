@@ -2,14 +2,16 @@ import { Rule } from "../components/chrome";
 
 const STACK = [
   ["frontend", "React 19 · TypeScript · Vite · Tailwind"],
-  ["backend", "Spring Boot 4 · Java 27 · PostgreSQL"],
+  ["backend", "Spring Boot 4 · Java 27 · SQLite"],
   ["módulos", "plan-engine · content-generation · onboarding-chat"],
 ];
 
 const STATE = [
-  ["db", "migrations V1 e V2 aplicadas"],
-  ["api", "sem controllers ainda"],
-  ["auth", "mock local — vira POST /auth/*"],
+  ["db", "migrations V1, V2 e V3 — em ~/.studys/studys.db, um arquivo só"],
+  ["api", "/plans e /plans/{id}/nodes/{nodeId} — sem autenticação, usuário único"],
+  ["contrato", "schema v2 congelado: o formato que o desktop e o web trocam"],
+  ["ia", "ainda não — nenhum cliente de provedor existe no repositório"],
+  ["front", "protótipo com dados mockados; não chama a API"],
 ];
 
 export function AboutPage() {

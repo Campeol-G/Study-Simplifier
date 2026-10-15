@@ -2,17 +2,17 @@ import { Rule } from "../components/chrome";
 
 const ENTRIES = [
   {
-    date: "2026-09-28",
-    what: "fluxo de auth completo no front (login, register, recover)",
-    note: "mock local em localStorage, sem backend conectado",
+    date: "2026-10-15",
+    what: "contrato v2, nível por plano e contador de tempo por sessão",
+    note: "SQLite em ~/.studys, migrations V1 a V3, e a autenticação removida do projeto inteiro",
+  },
+  {
+    date: "2026-10-09",
+    what: "contrato de dados compartilhado entre desktop e web",
+    note: "schema do plano, prompts de IA e fixtures — congelado a partir daqui",
   },
   {
     date: "2026-09-26",
-    what: "schema inicial com 5 entidades e migrations V1/V2",
-    note: "users, plans, plan_nodes, content_cache, resources",
-  },
-  {
-    date: "2026-09-25",
     what: "esqueleto multi-módulo",
     note: "apps, services, shared e infra",
   },

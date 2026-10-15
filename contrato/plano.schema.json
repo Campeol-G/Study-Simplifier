@@ -5,11 +5,11 @@
   "description": "Arquivo trocado entre o StudyS desktop (Java/SQLite) e o StudyS web (TypeScript/estatico). Espelha o modelo persistido em plan_nodes, com ids derivados de caminho para tornar a importacao idempotente.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "origem", "criadoEm", "assunto", "nivel", "meta", "nos"],
+  "required": ["schemaVersion", "origem", "criadoEm", "assunto", "nivel_inicial", "nivel_atual", "meta", "nos"],
   "properties": {
     "schemaVersion": {
       "description": "Versao deste formato. Mudanca = schema novo e migracao explicita no consumidor; um plano com versao desconhecida nao pode ser importado.",
-      "const": 1
+      "const": 2
     },
     "origem": {
       "description": "Quem produziu o arquivo.",
@@ -26,9 +26,13 @@
       "minLength": 1,
       "maxLength": 200
     },
-    "nivel": {
-      "description": "Nivel de partida definido no nivelamento.",
-      "enum": ["iniciante", "intermediario", "avancado"]
+    "nivel_inicial": {
+      "description": "Nivel de partida do usuario no assunto, no momento da geracao do plano. Imutavel: e o registro do ponto de origem, e nao deve mudar quando o usuario avanca.",
+      "enum": ["iniciante", "iniciante_basico", "intermediario", "avancado", "especialista"]
+    },
+    "nivel_atual": {
+      "description": "Nivel do usuario no assunto agora. Comeca igual a nivel_inicial e muda conforme o progresso; e o valor que o produto deve exibir e usar para sugerir conteudo.",
+      "enum": ["iniciante", "iniciante_basico", "intermediario", "avancado", "especialista"]
     },
     "meta": {
       "description": "Orcamento de estudo que dimensionou o plano.",
@@ -45,6 +49,16 @@
           "description": "Quantas semanas o plano deve cobrir.",
           "type": "integer",
           "minimum": 1
+        },
+        "prazoPedidoSemanas": {
+          "description": "Prazo em semanas que o usuario quer cumprir, quando ele mesmo deu uma estimativa. Pode ausente; quando presente e maior que duracaoSemanas, o plano prioriza o prazo pedido.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "restricoes": {
+          "description": "Limitacoes declaradas pelo usuario (tempo indisponivel, material obrigatorio, o que evitar). Opcional: quando ausente, o plano assume nenhuma restricao.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
         }
       }
     },

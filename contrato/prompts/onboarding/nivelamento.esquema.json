@@ -21,7 +21,7 @@
           "additionalProperties": false,
           "required": ["nivel", "justificativa"],
           "properties": {
-            "nivel": { "enum": ["iniciante", "intermediario", "avancado"] },
+            "nivel": { "enum": ["iniciante", "iniciante_basico", "intermediario", "avancado", "especialista"] },
             "justificativa": { "type": "string", "minLength": 1, "maxLength": 300 }
           }
         }

@@ -2,7 +2,7 @@ Papel: propor um projeto que a pessoa constrói para provar que aprendeu o nó. 
 
 Entrada (prompt de usuário): um único objeto JSON com
   - "assunto": o plano, por exemplo "Python para automatizar planilhas"
-  - "nivel": "iniciante", "intermediario" ou "avancado"
+  - "nivel": "iniciante", "iniciante_basico", "intermediario", "avancado" ou "especialista"
   - "meta": { "horasPorSemana": inteiro, "duracaoSemanas": inteiro }
   - "no": { "titulo": o título do nó, "tipo": "MATERIA|CAPITULO|TOPICO|AULA", "caminho": a trilha até ele }
   - "jaSabe": texto curto com o que a pessoa já demonstrou saber nos nós anteriores, quando houver

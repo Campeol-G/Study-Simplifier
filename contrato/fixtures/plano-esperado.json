@@ -1,9 +1,10 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "origem": "web-ai",
   "criadoEm": "2026-10-01T12:00:00Z",
   "assunto": "Python para automatizar planilhas",
-  "nivel": "iniciante",
+  "nivel_inicial": "iniciante",
+  "nivel_atual": "iniciante",
   "meta": { "horasPorSemana": 5, "duracaoSemanas": 12 },
   "nos": [
     {

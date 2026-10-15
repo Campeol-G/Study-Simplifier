@@ -34,8 +34,8 @@ class ContratoPlanoTest {
 
     private static final Path CONTRATO = Path.of("..", "..", "contrato");
 
-    private static final Set<String> CHAVES_PLANO =
-            Set.of("schemaVersion", "origem", "criadoEm", "assunto", "nivel", "meta", "nos");
+    private static final Set<String> CHAVES_PLANO = Set.of("schemaVersion", "origem", "criadoEm",
+            "assunto", "nivel_inicial", "nivel_atual", "meta", "nos");
 
     private static final Set<String> CHAVES_NO =
             Set.of("id", "paiId", "tipo", "titulo", "ordem", "nivelDominio", "status", "slug");
@@ -48,7 +48,8 @@ class ContratoPlanoTest {
 
     private static final Set<String> STATUS_NO = Set.of("TODO", "IN_PROGRESS", "DONE", "SKIPPED");
 
-    private static final Set<String> NIVEIS = Set.of("iniciante", "intermediario", "avancado");
+    private static final Set<String> NIVEIS =
+            Set.of("iniciante", "iniciante_basico", "intermediario", "avancado", "especialista");
 
     private static final Set<String> TIPOS_CONTEUDO = Set.of("THEORY", "QUESTIONS", "PROJECT");
 
@@ -108,10 +109,10 @@ class ContratoPlanoTest {
     }
 
     @Test
-    @DisplayName("schemaVersion e 1 e criadoEm e data-time")
+    @DisplayName("schemaVersion e 2 e criadoEm e data-time")
     void versionamentoEData() {
         assertThat(plano.get("schemaVersion").isInt()).isTrue();
-        assertThat(plano.get("schemaVersion").intValue()).isEqualTo(1);
+        assertThat(plano.get("schemaVersion").intValue()).isEqualTo(2);
         assertThat(DATA_HORA.matcher(plano.get("criadoEm").asText()).matches())
                 .as("criadoEm fora de ISO-8601: %s", plano.get("criadoEm").asText())
                 .isTrue();
@@ -121,7 +122,8 @@ class ContratoPlanoTest {
     @DisplayName("origem, nivel e assunto valem um valor do contrato")
     void camposEscalares() {
         assertThat(Set.of("web-ai", "web-script", "desktop")).contains(plano.get("origem").asText());
-        assertThat(NIVEIS).contains(plano.get("nivel").asText());
+        assertThat(NIVEIS).as("nivel_inicial").contains(plano.get("nivel_inicial").asText());
+        assertThat(NIVEIS).as("nivel_atual").contains(plano.get("nivel_atual").asText());
         assertThat(plano.get("assunto").asText()).isNotBlank();
     }
 
@@ -293,12 +295,85 @@ class ContratoPlanoTest {
 
     // ------------------------------------------------------------------ arranjo entre artefatos
 
+    /**
+     * A escala de nivel aparece em varios esquemas, nao so em dois. Comparar apenas
+     * plano.schema.json com plan-generation/esquema-saida.json deixava passar
+     * nivelamento.esquema.json e conclusao.esquema.json, que declaravam a escala antiga em silencio.
+     * Aqui a regra e "onde quer que o nivel seja declarado, e a escala do contrato", o que tambem pega
+     * qualquer arquivo novo que introduza uma escala paralela.
+     */
+    @Test
+    @DisplayName("todo esquema que declara nivel usa a mesma escala de cinco valores do contrato")
+    void escalaDeNivelEhUnicaEmTodoOContrato() throws IOException {
+        List<String> oficial = valores(enumDoPlano("nivel_inicial"));
+        assertThat(oficial)
+                .as("a escala de nivel do contrato")
+                .containsExactly("iniciante", "iniciante_basico", "intermediario", "avancado", "especialista");
+
+        List<String> esquemasComNivel = new ArrayList<>();
+        List<String> divergentes = new ArrayList<>();
+        try (var arquivos = Files.walk(CONTRATO)) {
+            for (Path arquivo : arquivos.filter(p -> p.getFileName().toString().endsWith(".json"))
+                    .toList()) {
+                String nome = CONTRATO.relativize(arquivo).toString();
+                for (EnumDeNivel onde : enumsDeNivel(JSON.readTree(Files.readString(arquivo)))) {
+                    List<String> encontrados = valores(onde.no().path("enum"));
+                    if (!encontrados.equals(oficial)) {
+                        divergentes.add(nome + " em " + onde.caminho() + " -> " + encontrados);
+                    } else {
+                        esquemasComNivel.add(nome + " em " + onde.caminho());
+                    }
+                }
+            }
+        }
+
+        assertThat(divergentes)
+                .as("esquemas com escala de nivel diferente de plano.schema.json")
+                .isEmpty();
+        assertThat(esquemasComNivel)
+                .as("a varredura tem de achar as 5 declaracoes de nivel do contrato v2; "
+                        + "uma lista vazia aqui faria a assercao passar sem conferir nada")
+                .hasSize(5);
+    }
+
+    /** Uma declaracao de {@code nivel} dentro de um esquema, com o caminho onde ela foi achada. */
+    private record EnumDeNivel(String caminho, JsonNode no) {
+    }
+
+    private static List<EnumDeNivel> enumsDeNivel(JsonNode raiz) {
+        List<EnumDeNivel> achados = new ArrayList<>();
+        var em = new java.util.ArrayDeque<Object[]>();
+        em.add(new Object[] {"$", raiz});
+        while (!em.isEmpty()) {
+            Object[] par = em.poll();
+            String caminho = (String) par[0];
+            JsonNode no = (JsonNode) par[1];
+            if (no.isObject()) {
+                // qualquer chave que comece com "nivel": plano.schema.json declara nivel_inicial e
+                // nivel_atual, e os esquemas de onboarding declaram nivel. Comparar so com ".nivel"
+                // deixaria os dois primeiros do contrato de fora da varredura.
+                String ultimaParte = caminho.substring(caminho.lastIndexOf('.') + 1);
+                if (no.has("enum") && ultimaParte.startsWith("nivel")) {
+                    achados.add(new EnumDeNivel(caminho, no));
+                }
+                for (String filho : no.propertyNames()) {
+                    em.add(new Object[] {caminho + "." + filho, no.get(filho)});
+                }
+            } else if (no.isArray()) {
+                for (int i = 0; i < no.size(); i++) {
+                    em.add(new Object[] {caminho + "[" + i + "]", no.get(i)});
+                }
+            }
+        }
+        return achados;
+    }
+
     @Test
     @DisplayName("enums de nivel e tipo sao identicos no plano.schema.json e no esquema-saida.json")
     void enumsComunsSaoIdenticos() {
         assertThat(valores(esquemaSaida.path("properties").path("nivel").path("enum")))
                 .as("enum nivel divergente entre plano.schema.json e plan-generation/esquema-saida.json")
-                .isEqualTo(valores(enumDoPlano("nivel")));
+                .isEqualTo(valores(enumDoPlano("nivel_inicial")));
         assertThat(valores(esquemaSaida.path("properties").path("nos").path("items")
                 .path("properties").path("tipo").path("enum")))
                 .as("enum tipo divergente entre plano.schema.json e plan-generation/esquema-saida.json")
@@ -342,11 +417,12 @@ class ContratoPlanoTest {
     void ramoOpcionalComConteudoERecursos() {
         String bruto = """
                 {
-                  "schemaVersion": 1,
+                  "schemaVersion": 2,
                   "origem": "desktop",
                   "criadoEm": "2026-10-01T12:00:00Z",
                   "assunto": "Java",
-                  "nivel": "avancado",
+                  "nivel_inicial": "avancado",
+                  "nivel_atual": "avancado",
                   "meta": { "horasPorSemana": 3, "duracaoSemanas": 4 },
                   "nos": [
                     { "id": "java", "paiId": null, "tipo": "MATERIA", "titulo": "Java", "ordem": 0,

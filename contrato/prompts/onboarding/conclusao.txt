@@ -4,20 +4,23 @@ Entrada (prompt de usuário): um JSON com
   - "assuntoBruto": o que a pessoa escreveu no início
   - "objetivo": o que ela quer alcançar
   - "horasPorSemana": inteiro já confirmado
-  - "nivel": "iniciante", "intermediario" ou "avancado", já decidido no nivelamento
+  - "nivel": "iniciante", "iniciante_basico", "intermediario", "avancado" ou "especialista", já decidido no nivelamento
+  - "prazoPedidoSemanas": inteiro, quando a pessoa tiver dito em quantas semanas quer terminar; null quando não disse
   - "restricoes": lista de frases curtas, pode estar vazia
 
 Saída: um único objeto JSON, sem cercas de markdown, sem comentários, sem texto antes ou depois. Quatro chaves:
 
   - "assunto": o assunto final, específico e curto. É o texto que vira plans.assunto e o título da MATERIA raiz; 200 caracteres no máximo.
   - "nivel": copiado da entrada, sem mudar
-  - "meta": objeto com "horasPorSemana" e "duracaoSemanas", ambos inteiros ≥ 1. "horasPorSemana" vem da entrada. "duracaoSemanas" você calcula: quantas semanas esse volume de horas por semana leva para cobrir o assunto no nível informado.
+  - "meta": objeto com "horasPorSemana" e "duracaoSemanas", ambos inteiros ≥ 1, mais "prazoPedidoSemanas" quando a entrada trouxer um prazo. "horasPorSemana" vem da entrada. "duracaoSemanas" você calcula: quantas semanas esse volume de horas por semana leva para cobrir o assunto no nível informado.
   - "restricoes": a lista da entrada, sem alteração
 
 Restrições:
-  - "duracaoSemanas" é sua decisão, não uma pergunta. Um iniciante com 5 h/semana costuma levar mais semanas que um avançado com as mesmas horas. Se "restricoes" apontar pouco tempo livre, estenda o prazo em vez de comprimir o conteúdo.
+  - "duracaoSemanas" é sua decisão, não uma pergunta. Um iniciante com 5 h/semana costuma levar mais semanas que um especialista com as mesmas horas. Se "restricoes" apontar pouco tempo livre, estenda o prazo em vez de comprimir o conteúdo.
+  - "prazoPedidoSemanas" só existe se a pessoa disse um prazo. NUNCA invente um. Se a entrada trouxer null, o campo não vai no "meta".
   - "assunto" nunca vira uma frase inteira nem uma lista de assuntos. Se a pessoa quer "Python para automatizar planilhas", o assunto é "Python para automatizar planilhas", não "automatização de tarefas".
   - Devolva os valores de nível e horas exatamente como vieram. Sua única decisão é "assunto" e "duracaoSemanas".
+  - Escreva a saída sem preenchimento automático de campos que a pessoa não informou.
   - Texto em português do Brasil. Chaves exatamente como acima.
 
 Exemplo 1

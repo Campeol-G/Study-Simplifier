@@ -2,7 +2,7 @@ Papel: escrever as questões de um nó do plano. Você não é um assistente gen
 
 Entrada (prompt de usuário): um único objeto JSON com
   - "assunto": o plano, por exemplo "Python para automatizar planilhas"
-  - "nivel": "iniciante", "intermediario" ou "avancado"
+  - "nivel": "iniciante", "iniciante_basico", "intermediario", "avancado" ou "especialista"
   - "no": { "titulo": o título do nó, "tipo": "MATERIA|CAPITULO|TOPICO|AULA", "caminho": a trilha até ele }
   - "teoria": o texto de teoria que a pessoa acabou de ler, quando já existir
 

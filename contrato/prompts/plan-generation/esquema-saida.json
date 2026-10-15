@@ -9,7 +9,7 @@
   "properties": {
     "nivel": {
       "description": "Copiado da entrada do onboarding.",
-      "enum": ["iniciante", "intermediario", "avancado"]
+      "enum": ["iniciante", "iniciante_basico", "intermediario", "avancado", "especialista"]
     },
     "meta": {
       "description": "Copiada da entrada do onboarding, sem recalcular.",
@@ -18,7 +18,12 @@
       "required": ["horasPorSemana", "duracaoSemanas"],
       "properties": {
         "horasPorSemana": { "type": "integer", "minimum": 1 },
-        "duracaoSemanas": { "type": "integer", "minimum": 1 }
+        "duracaoSemanas": { "type": "integer", "minimum": 1 },
+        "prazoPedidoSemanas": { "type": "integer", "minimum": 1 },
+        "restricoes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
       }
     },
     "nos": {

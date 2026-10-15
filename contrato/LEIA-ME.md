@@ -28,8 +28,8 @@ Os enums espelham o codigo Java, nao o contrario:
 | `nos[].conteudo.tipo` | `com.studys.schemas.content.ContentType` |
 | `nos[].recursos[].tipo` | `com.studys.schemas.content.ResourceType` |
 
-`nivel` (`iniciante`, `intermediario`, `avancado`) e a unica coisa do contrato que ainda nao existe em
-Java: foi criado aqui e o Java passa atipar contra ele.
+O nivel e a unica coisa do contrato que ainda nao existia em Java: foi criado aqui e o Java passa a
+bater contra ele.
 
 ## Regra de ids
 
@@ -48,10 +48,51 @@ generalizacao dele.
 
 ## Versionamento
 
-`schemaVersion` e obrigatorio e hoje vale `1` (`const`, nao `enum`: nao existe versao 2). Sem ele a
+`schemaVersion` e obrigatorio e hoje vale `2` (`const`, nao `enum`: nao existe versao 3). Sem ele a
 primeira mudanca de formato quebraria os planos do usuario sem caminho de migracao. Mudanca de
 formato significa schema novo mais migracao explicita no consumidor; um plano com versao
 desconhecida nao pode ser importado.
+
+### v1 -> v2
+
+A v2 foi feita enquanto ainda nao existia consumidor: nenhum arquivo de plano foi gerado e nenhum
+codigo lia o formato. Por isso a migracao e um no-op — a versao antiga simplesmente nunca circulou.
+
+| Mudanca | Antes | Depois |
+|---|---|---|
+| nivel | um campo `nivel` | `nivel_inicial` (imutavel) e `nivel_atual` (mutavel) |
+| escala | 3 valores | 5: `iniciante`, `iniciante_basico`, `intermediario`, `avancado`, `especialista` |
+| turno do onboarding | `pergunta` | `fala` |
+| `meta` | `horasPorSemana`, `duracaoSemanas` | + `prazoPedidoSemanas` e `restricoes`, ambos opcionais |
+| estilo dos prompts | sem instrucao | uma linha por prompt de onboarding |
+
+Tres dessas precisam de counterparts no Java, e existem:
+
+| No contrato | No codigo |
+|---|---|
+| `nivel_inicial` / `nivel_atual` | `PlanEntity.nivelInicial` / `PlanEntity.nivelAtual` |
+| `meta.horasPorSemana` / `duracaoSemanas` | `PlanEntity.horasPorSemana` / `duracaoSemanas` |
+| `meta.restricoes` | `PlanEntity.restricoes` |
+| `nos[].segundosEstudados` (total, derivado) | `PlanNodeEntity.segundosEstudados` |
+| (sessoes, detalhes do contador) | `SessaoEstudoEntity` |
+
+As colunas novas de `plans` sao anulaveis no banco porque um plano criado antes da V2 existe de
+verdade e nao tem nivel nem orcamento: nao ha valor para backfill porque qualquer um seria
+inventado. O contrato, diferentemente, exige os dois niveis, porque um arquivo importado tem de
+declarar os dois. Banco mais permissivo que arquivo e o sentido correto — o arquivo e a fronteira
+com o exterior.
+
+Quem produz `nivel_inicial` e `nivel_atual`: o gerador de plano ainda emite um campo so, `nivel`,
+que e o nivel de partida. Na importacao ele vira os dois, com `nivel_atual` igual a `nivel_inicial` —
+a copia inicial e o unico ponto onde os dois coincidem, e e por isso que nao ha campo de nivel no
+`plan-generation/esquema-saida.json` para os dois. Divergir depois e o produto mudando `nivel_atual`,
+que e a unica direcao que faz sentido.
+
+`pergunta` virou `fala` porque o turno de uma conversa de professor nao e so uma pergunta: e
+reconhecer o que a pessoa acabou de dizer e depois perguntar, num texto so. O campo `pergunta`
+empurrava a IA para a pergunta seca. `nivelamento` mantem `perguntas` na saida porque ali e uma
+lista de sondagens planejadas de uma vez, nao um turno de conversa — mas o `historico` dele usa
+`fala`, igual ao de `descoberta`.
 
 ## Invariantes que JSON Schema nao expressa
 

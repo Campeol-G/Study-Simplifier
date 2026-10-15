@@ -4,7 +4,7 @@
   "title": "Saida da etapa de descoberta",
   "type": "object",
   "additionalProperties": false,
-  "required": ["etapa", "obtido", "faltando", "pergunta"],
+  "required": ["etapa", "obtido", "faltando", "fala"],
   "properties": {
     "etapa": {
       "enum": ["descoberta", "concluida"]
@@ -26,6 +26,9 @@
       "type": "array",
       "items": { "enum": ["objetivo", "assunto", "horasPorSemana", "restricoes"] }
     },
-    "pergunta": { "type": "string" }
+    "fala": {
+      "description": "O turno da IA: o que ela diz para a pessoa agora. Pode reconhecer o que acabou de ser dito antes de perguntar o que falta; quando etapa e concluida, e uma despedida curta.",
+      "type": "string"
+    }
   }
 }

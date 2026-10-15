@@ -2,14 +2,14 @@ Papel: transformar a saída da conclusão do onboarding na hierarquia de nós qu
 
 Entrada (prompt de usuário): um único objeto JSON no formato exato da conclusão do onboarding:
   - "assunto": o assunto final
-  - "nivel": "iniciante", "intermediario" ou "avancado"
+  - "nivel": "iniciante", "iniciante_basico", "intermediario", "avancado" ou "especialista"
   - "meta": { "horasPorSemana": inteiro, "duracaoSemanas": inteiro }
   - "restricoes": lista de frases curtas, pode estar vazia
 
 Saída: um único objeto JSON, sem cercas de markdown, sem comentários, sem texto antes ou depois:
 
   {
-    "nivel": "iniciante|intermediario|avancado",
+    "nivel": "iniciante|iniciante_basico|intermediario|avancado|especialista",
     "meta": { "horasPorSemana": <inteiro>, "duracaoSemanas": <inteiro> },
     "nos": [
       { "tipo": "MATERIA", "titulo": "...", "filhos": [ ... ] },
@@ -29,7 +29,7 @@ Você não produz "id", "slug", "ordem", "status" nem "nivelDominio". O StudyS d
 
 Dimensionamento:
   - O plano tem de caber em "meta.horasPorSemana" × "meta.duracaoSemanas". Some a quantidade de nós: cada AULA ocupa mais tempo que um TOPICO, cada TOPICO mais que um CAPITULO.
-  - "nivel": "avancado" pula fundamentos; "iniciante" inclui fundamentos e prática; "intermediario" assume o básico e vai direto de prática.
+  - "nivel" guia o corte de profundidade, do mais raso ao mais fundo: "iniciante" e "iniciante_basico" include fundamentos e prática; "intermediario" assume o básico e vai direto de prática; "avancado" e "especialista" pulam fundamentos e vão para os casos difíceis.
   - Se "restricoes" disser que há pouco tempo, reduza a granularidade: menos AULAs, não menos capítulos.
   - Respeite "meta" exatamente como veio. Você não recalcula nem ajusta.
 

@@ -7,14 +7,18 @@
   "required": ["assunto", "nivel", "meta", "restricoes"],
   "properties": {
     "assunto": { "type": "string", "minLength": 1, "maxLength": 200 },
-    "nivel": { "enum": ["iniciante", "intermediario", "avancado"] },
+    "nivel": {
+      "description": "Nivel de partida do usuario no assunto. Imutavel apos a geracao do plano.",
+      "enum": ["iniciante", "iniciante_basico", "intermediario", "avancado", "especialista"]
+    },
     "meta": {
       "type": "object",
       "additionalProperties": false,
       "required": ["horasPorSemana", "duracaoSemanas"],
       "properties": {
         "horasPorSemana": { "type": "integer", "minimum": 1 },
-        "duracaoSemanas": { "type": "integer", "minimum": 1 }
+        "duracaoSemanas": { "type": "integer", "minimum": 1 },
+        "prazoPedidoSemanas": { "type": "integer", "minimum": 1 }
       }
     },
     "restricoes": {

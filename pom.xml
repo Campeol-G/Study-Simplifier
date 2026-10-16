@@ -25,6 +25,7 @@
 	<modules>
 		<module>shared/schemas</module>
 		<module>infra/db</module>
+		<module>infra/llm</module>
 		<module>services/plan-engine</module>
 		<module>services/content-generation</module>
 		<module>services/onboarding-chat</module>

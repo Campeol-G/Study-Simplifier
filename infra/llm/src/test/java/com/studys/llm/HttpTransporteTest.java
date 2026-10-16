@@ -68,7 +68,9 @@ class HttpTransporteTest {
 
     @AfterEach
     void servidorAbaixo() {
-        servidor.stop(0);
+        if (servidor != null) {
+            servidor.stop(0);
+        }
     }
 
     private static RequisicaoHttp post(String url, String corpo) {
@@ -177,6 +179,19 @@ class HttpTransporteTest {
         assertThat(resposta.corpo())
                 .as("o transporte nao parseia o corpo, devolve o html exato")
                 .isEqualTo("<html><body>não autorizado</body></html>");
+    }
+
+    @Test
+    @DisplayName("url malformada vira erro nomeado, não exceção crua de montagem")
+    void urlMalformadaViraErroNomeado() {
+        String url = "http://127.0.0.1:1/recurso com espaço";
+        RequisicaoHttp requisicao = get(url);
+
+        assertThatThrownBy(() -> transporte.enviar(requisicao))
+                .as("url digitada à mão que não parseia vira o erro nomeado do transporte, não "
+                        + "IllegalArgumentException crua")
+                .isInstanceOf(FalhaDeTransporte.class)
+                .hasMessageContaining(url);
     }
 
     @Test

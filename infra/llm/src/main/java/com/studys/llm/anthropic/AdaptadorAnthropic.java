@@ -14,6 +14,7 @@ import com.studys.llm.Tokens;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -76,8 +77,9 @@ public class AdaptadorAnthropic implements AdaptadorProvedor {
 
     /**
      * Lê a resposta da API de mensagens: os blocos {@code text} viram o texto, os blocos
-     * {@code thinking} viram o raciocínio, e {@code usage} vira os tokens. Status 400 ou
-     * acima vira {@link ProvedorRecusou} com o corpo cru, para a tradução de erros ler.
+     * {@code thinking} viram o raciocínio, {@code stop_reason} vira o motivo de parada, e
+     * {@code usage} vira os tokens. Status 400 ou acima, ou corpo 2xx ilegível — que não é JSON,
+     * ou vazio —, vira {@link ProvedorRecusou} com o corpo cru, para a tradução de erros ler.
      *
      * <p>Exercitada sobre {@code gravado/anthropic-resposta.json}, uma captura sintética
      * escrita à mão — ainda não há chave real para gravar uma resposta verdadeira — fiel
@@ -89,7 +91,15 @@ public class AdaptadorAnthropic implements AdaptadorProvedor {
         if (http.status() >= 400) {
             throw new ProvedorRecusou(http.status(), http.corpo());
         }
-        JsonNode raiz = JSON.readTree(http.corpo());
+        JsonNode raiz;
+        try {
+            raiz = JSON.readTree(http.corpo());
+        } catch (JacksonException e) {
+            throw new ProvedorRecusou(http.status(), http.corpo());
+        }
+        if (raiz.isMissingNode()) {
+            throw new ProvedorRecusou(http.status(), http.corpo());
+        }
         List<String> textos = new ArrayList<>();
         List<String> raciocinios = new ArrayList<>();
         JsonNode conteudo = raiz.get("content");
@@ -110,6 +120,11 @@ public class AdaptadorAnthropic implements AdaptadorProvedor {
             entrada = uso.path("input_tokens").asInt(0);
             saida = uso.path("output_tokens").asInt(0);
         }
-        return new Resposta(String.join("\n\n", textos), String.join("\n\n", raciocinios), new Tokens(entrada, saida));
+        String motivoDeParada = raiz.path("stop_reason").asString("");
+        return new Resposta(
+                String.join("\n\n", textos),
+                String.join("\n\n", raciocinios),
+                motivoDeParada,
+                new Tokens(entrada, saida));
     }
 }

@@ -37,7 +37,9 @@ class TransporteFalsoTest {
 
     @AfterEach
     void servidorAbaixo() {
-        servidor.stop(0);
+        if (servidor != null) {
+            servidor.stop(0);
+        }
     }
 
     private static RequisicaoHttp post(String url, String corpo) {

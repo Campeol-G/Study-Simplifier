@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,11 +38,45 @@ class TiposNeutrosTest {
     @Test
     @DisplayName("raciocinio vazio vira string vazia, nunca nulo")
     void raciocinioNuloViraStringVazia() {
-        Resposta resposta = new Resposta("texto", null, tokens());
+        Resposta resposta = new Resposta("texto", null, null, tokens());
 
         assertThat(resposta.raciocinio())
                 .as("raciocinio ausente e ausencia de reasoning, nao um nulo que quebre o chamador")
                 .isEqualTo("");
+    }
+
+    @Test
+    @DisplayName("motivo de parada nulo vira string vazia, nunca nulo")
+    void motivoDeParadaNuloViraStringVazia() {
+        Resposta resposta = new Resposta("texto", null, null, tokens());
+
+        assertThat(resposta.motivoDeParada())
+                .as("motivo de parada ausente e ausencia de sinal, nao um nulo que quebre o chamador")
+                .isEqualTo("");
+    }
+
+    @Test
+    @DisplayName("o toString esconde o valor dos cabeçalhos que carregam credencial")
+    void toStringEscondeCredencialDosCabecalhos() {
+        RequisicaoHttp http = new RequisicaoHttp(
+                MetodoHttp.POST,
+                "https://api.anthropic.com/v1/messages",
+                Map.of(
+                        "X-Api-Key", "segredo-da-chave",
+                        "authorization", "Bearer segredo-do-bearer",
+                        "anthropic-version", "2023-06-01"),
+                "{}",
+                Duration.ofSeconds(5));
+
+        String impresso = http.toString();
+
+        assertThat(impresso)
+                .as("nem a chave de api nem o bearer token aparecem no texto impresso")
+                .doesNotContain("segredo-da-chave")
+                .doesNotContain("segredo-do-bearer");
+        assertThat(impresso)
+                .as("cabeçalho sem credencial continua visível para depurar")
+                .contains("anthropic-version=2023-06-01");
     }
 
     @Test

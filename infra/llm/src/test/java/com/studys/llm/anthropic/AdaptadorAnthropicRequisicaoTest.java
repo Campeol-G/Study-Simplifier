@@ -45,6 +45,11 @@ class AdaptadorAnthropicRequisicaoTest {
                 "anthropic", "Anthropic", TipoProvedor.ANTHROPIC, urlBase, "claude-sonnet-4-5");
     }
 
+    private static ConfiguracaoProvedor configuracao(String urlBase, String modeloPadrao) {
+        return new ConfiguracaoProvedor(
+                "anthropic", "Anthropic", TipoProvedor.ANTHROPIC, urlBase, modeloPadrao);
+    }
+
     private static RequisicaoHttp montada(String urlBase, Double temperatura) {
         return new AdaptadorAnthropic()
                 .montarRequisicao(requisicaoDeTeste(temperatura), configuracao(urlBase), CREDENCIAL);
@@ -112,6 +117,40 @@ class AdaptadorAnthropicRequisicaoTest {
 
         assertThat(corpo.has("temperature"))
                 .as("temperatura ausente significa chave ausente, nao nula")
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("modelo nulo na requisição cai para o modelo padrão do provedor")
+    void modeloNuloCaiParaOModeloPadrao() {
+        Requisicao semModelo = new Requisicao(
+                null, 1024, null, null, List.of(new Mensagem(Papel.USUARIO, "ola")), Duration.ofSeconds(180));
+
+        RequisicaoHttp http = new AdaptadorAnthropic()
+                .montarRequisicao(
+                        semModelo, configuracao("https://api.anthropic.com", "claude-opus-4-1"), CREDENCIAL);
+
+        assertThat(corpoDe(http).get("model").asString())
+                .as("sem modelo pedido, o corpo carrega o modelo padrao da configuracao, nao um nulo")
+                .isEqualTo("claude-opus-4-1");
+    }
+
+    @Test
+    @DisplayName("requisição sem prompt de sistema não leva a chave system no corpo")
+    void semSistemaNaoLevaChaveSystem() {
+        Requisicao semSistema = new Requisicao(
+                "claude-sonnet-4-5",
+                1024,
+                null,
+                null,
+                List.of(new Mensagem(Papel.USUARIO, "ola")),
+                Duration.ofSeconds(180));
+
+        JsonNode corpo = corpoDe(new AdaptadorAnthropic()
+                .montarRequisicao(semSistema, configuracao("https://api.anthropic.com"), CREDENCIAL));
+
+        assertThat(corpo.has("system"))
+                .as("sem prompt de sistema, a chave system fica ausente, nao vazia nem nula")
                 .isFalse();
     }
 

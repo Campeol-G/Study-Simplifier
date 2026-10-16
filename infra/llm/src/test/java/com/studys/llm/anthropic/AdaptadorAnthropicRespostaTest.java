@@ -92,6 +92,91 @@ class AdaptadorAnthropicRespostaTest {
     }
 
     @Test
+    @DisplayName("corpo 2xx que não é JSON vira ProvedorRecusou, não exceção crua de parse")
+    void corpoNaoJsonCom2xxViraProvedorRecusou() {
+        String html = "<html><body>bem-vindo ao portal</body></html>";
+
+        assertThatThrownBy(() -> adaptador.lerResposta(new RespostaHttp(200, html)))
+                .as("uma urlBase apontando para um site devolve algo que o adaptador não consegue ler")
+                .isInstanceOfSatisfying(ProvedorRecusou.class, recusou -> {
+                    assertThat(recusou.status()).as("o status 2xx viaja na excecao").isEqualTo(200);
+                    assertThat(recusou.corpo()).as("o corpo cru viaja na excecao").isEqualTo(html);
+                });
+    }
+
+    @Test
+    @DisplayName("corpo 2xx vazio vira ProvedorRecusou, não sucesso falso")
+    void corpoVazioCom2xxViraProvedorRecusou() {
+        assertThatThrownBy(() -> adaptador.lerResposta(new RespostaHttp(200, "")))
+                .as("resposta vazia não é resposta usável: falhar alto, não fingir sucesso")
+                .isInstanceOfSatisfying(ProvedorRecusou.class, recusou -> {
+                    assertThat(recusou.status()).as("o status 2xx viaja na excecao").isEqualTo(200);
+                    assertThat(recusou.corpo()).as("o corpo cru, ainda que vazio, viaja na excecao")
+                            .isEqualTo("");
+                });
+    }
+
+    @Test
+    @DisplayName("o motivo de parada vem de stop_reason")
+    void motivoDeParadaVemDeStopReason() throws Exception {
+        Resposta resposta = adaptador.lerResposta(new RespostaHttp(200, corpoGravado()));
+
+        assertThat(resposta.motivoDeParada())
+                .as("o stop_reason da API viaja na resposta neutra, para truncamento não virar "
+                        + "falha genérica de esquema")
+                .isEqualTo("end_turn");
+    }
+
+    @Test
+    @DisplayName("stop_reason ausente ou nulo vira string vazia, nunca nulo")
+    void stopReasonAusenteOuNuloViraStringVazia() {
+        String semChave = """
+                {"content": [{"type": "text", "text": "oi"}], \
+                "usage": {"input_tokens": 1, "output_tokens": 2}}\
+                """;
+        String comNulo = """
+                {"stop_reason": null, "content": [{"type": "text", "text": "oi"}], \
+                "usage": {"input_tokens": 1, "output_tokens": 2}}\
+                """;
+
+        assertThat(adaptador.lerResposta(new RespostaHttp(200, semChave)).motivoDeParada())
+                .as("stop_reason ausente é ausência de sinal, não erro")
+                .isEqualTo("");
+        assertThat(adaptador.lerResposta(new RespostaHttp(200, comNulo)).motivoDeParada())
+                .as("stop_reason nulo também vira string vazia, nunca a literal \"null\"")
+                .isEqualTo("");
+    }
+
+    @Test
+    @DisplayName("corpo sem a chave content deixa texto e raciocínio vazios, e lê o uso")
+    void semChaveContentDeixaTextoEVazioLeUso() {
+        String corpo = """
+                {"stop_reason": "end_turn", "usage": {"input_tokens": 3, "output_tokens": 4}}\
+                """;
+
+        Resposta resposta = adaptador.lerResposta(new RespostaHttp(200, corpo));
+
+        assertThat(resposta.texto()).as("content ausente e texto vazio, nao excecao").isEqualTo("");
+        assertThat(resposta.raciocinio()).as("content ausente e raciocinio vazio").isEqualTo("");
+        assertThat(resposta.uso().entrada()).as("usage presente continua sendo lido").isEqualTo(3);
+        assertThat(resposta.uso().saida()).as("usage presente continua sendo lido").isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("corpo sem a chave usage deixa os tokens em zero, e lê o texto")
+    void semChaveUsageDeixaTokensEmZero() {
+        String corpo = """
+                {"content": [{"type": "text", "text": "oi"}], "stop_reason": "end_turn"}\
+                """;
+
+        Resposta resposta = adaptador.lerResposta(new RespostaHttp(200, corpo));
+
+        assertThat(resposta.texto()).as("content presente continua sendo lido").isEqualTo("oi");
+        assertThat(resposta.uso().entrada()).as("usage ausente e entrada zero, nao excecao").isZero();
+        assertThat(resposta.uso().saida()).as("usage ausente e saida zero").isZero();
+    }
+
+    @Test
     @DisplayName("provedor recusando vira ProvedorRecusou com o corpo cru")
     void recusaViraProvedorRecusouComCorpoCru() {
         String corpo = """

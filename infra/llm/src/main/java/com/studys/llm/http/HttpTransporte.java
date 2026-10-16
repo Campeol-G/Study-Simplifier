@@ -16,6 +16,11 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * O transporte HTTP real. Limitações conscientes: o timeout cobre a troca até a resposta chegar,
+ * não a leitura do corpo, que é limitada só pelo teto de bytes (a retentativa é entrega posterior);
+ * e o corpo é sempre decodificado como UTF-8, sem honrar outro charset.
+ */
 public class HttpTransporte implements Transporte {
 
     public static final int LIMITE_CORPO_BYTES = 1024 * 1024;
@@ -30,16 +35,16 @@ public class HttpTransporte implements Transporte {
 
     @Override
     public RespostaHttp enviar(RequisicaoHttp requisicao) {
-        HttpRequest.Builder montador = HttpRequest.newBuilder()
-                .uri(URI.create(requisicao.url()))
-                .timeout(requisicao.timeout());
-        requisicao.cabecalhos().forEach(montador::header);
-        switch (requisicao.metodo()) {
-            case GET -> montador.GET();
-            case POST -> montador.POST(
-                    HttpRequest.BodyPublishers.ofString(requisicao.corpo(), StandardCharsets.UTF_8));
-        }
         try {
+            HttpRequest.Builder montador = HttpRequest.newBuilder()
+                    .uri(URI.create(requisicao.url()))
+                    .timeout(requisicao.timeout());
+            requisicao.cabecalhos().forEach(montador::header);
+            switch (requisicao.metodo()) {
+                case GET -> montador.GET();
+                case POST -> montador.POST(
+                        HttpRequest.BodyPublishers.ofString(requisicao.corpo(), StandardCharsets.UTF_8));
+            }
             HttpResponse<InputStream> resposta =
                     cliente.send(montador.build(), HttpResponse.BodyHandlers.ofInputStream());
             return new RespostaHttp(resposta.statusCode(), lerComLimite(resposta.body()));
@@ -57,6 +62,8 @@ public class HttpTransporte implements Transporte {
             throw new FalhaDeTransporte("requisição para " + requisicao.url() + " interrompida", e);
         } catch (IOException e) {
             throw new FalhaDeTransporte("falha de transporte para " + requisicao.url(), e);
+        } catch (IllegalArgumentException e) {
+            throw new FalhaDeTransporte("url inválida: " + requisicao.url(), e);
         }
     }
 

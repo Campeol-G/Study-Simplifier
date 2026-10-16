@@ -57,3 +57,6 @@ PROMPT-*.md
 infos.txt
 NOTAS.md
 docs/superpowers/
+
+# Worktrees locais: o trabalho em andamento fica isolado do main ate ser juntado.
+.worktrees/

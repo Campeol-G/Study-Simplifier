@@ -12,6 +12,7 @@ import com.studys.llm.TipoProvedor;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +36,8 @@ class AdaptadorAnthropicRequisicaoTest {
                         new Mensagem(Papel.SISTEMA, "primeiro sistema"),
                         new Mensagem(Papel.SISTEMA, "segundo sistema"),
                         new Mensagem(Papel.USUARIO, "ola"),
-                        new Mensagem(Papel.ASSISTENTE, "oi")));
+                        new Mensagem(Papel.ASSISTENTE, "oi")),
+                Duration.ofSeconds(180));
     }
 
     private static ConfiguracaoProvedor configuracao(String urlBase) {
@@ -61,6 +63,9 @@ class AdaptadorAnthropicRequisicaoTest {
                 .as("a barra final da base e somada a uma so barra do caminho")
                 .isEqualTo("https://api.anthropic.com/v1/messages");
         assertThat(http.metodo()).as("montar mensagem anthropic e POST").isEqualTo(MetodoHttp.POST);
+        assertThat(http.timeout())
+                .as("o prazo e o do chamador, nao uma constante do adaptador")
+                .isEqualTo(Duration.ofSeconds(180));
     }
 
     @Test

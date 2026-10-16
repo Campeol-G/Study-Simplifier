@@ -2,6 +2,7 @@ package com.studys.llm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +26,7 @@ class TiposNeutrosTest {
     void mensagensCopiadasNaoRefletemMudancaPosterior() {
         List<Mensagem> mensagens = duasMensagens();
 
-        Requisicao requisicao = new Requisicao("modelo", 100, null, null, mensagens);
+        Requisicao requisicao = new Requisicao("modelo", 100, null, null, mensagens, Duration.ofSeconds(60));
         mensagens.add(new Mensagem(Papel.USUARIO, "tardia"));
 
         assertThat(requisicao.mensagens())
@@ -46,7 +47,7 @@ class TiposNeutrosTest {
     @Test
     @DisplayName("uma requisição sem esquema é válida: nem toda chamada pede saída estruturada")
     void requisicaoSemEsquemaEValida() {
-        Requisicao requisicao = new Requisicao("modelo", 100, null, null, List.of());
+        Requisicao requisicao = new Requisicao("modelo", 100, null, null, List.of(), Duration.ofSeconds(60));
 
         assertThat(requisicao.esquema())
                 .as("sem esquema significa resposta livre, nao erro")

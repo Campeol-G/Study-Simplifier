@@ -9,7 +9,6 @@ import com.studys.llm.RequisicaoHttp;
 import com.studys.llm.Resposta;
 import com.studys.llm.RespostaHttp;
 import com.studys.llm.TipoProvedor;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +19,6 @@ import tools.jackson.databind.node.ObjectNode;
 public class AdaptadorAnthropic implements AdaptadorProvedor {
 
     private static final String VERSAO_API = "2023-06-01";
-
-    private static final Duration TIMEOUT = Duration.ofSeconds(60);
 
     private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -64,7 +61,7 @@ public class AdaptadorAnthropic implements AdaptadorProvedor {
                         "anthropic-version", VERSAO_API,
                         "content-type", "application/json"),
                 JSON.writeValueAsString(corpo),
-                TIMEOUT);
+                req.timeout());
     }
 
     private static ObjectNode mensagemJson(String papel, String texto) {

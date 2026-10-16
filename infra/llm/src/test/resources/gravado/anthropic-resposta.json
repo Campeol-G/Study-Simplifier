@@ -1,0 +1,1 @@
+{"content":[{"signature":"assinatura-sintetica","thinking":"O usuário cumprimentou; basta responder de forma breve e cordial.","type":"thinking"},{"text":"Olá! Como posso ajudar?","type":"text"}],"id":"msg_01987654321abcdef","role":"assistant","stop_reason":"end_turn","type":"message","usage":{"input_tokens":12,"output_tokens":34}}

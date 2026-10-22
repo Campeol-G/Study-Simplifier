@@ -34,9 +34,25 @@ public class AdaptadorAnthropic implements AdaptadorProvedor {
     @Override
     public RequisicaoHttp montarRequisicao(
             Requisicao req, ConfiguracaoProvedor cfg, String credencial) {
+        if (credencial == null || credencial.isBlank()) {
+            throw new ProvedorRecusou(0, "o provedor " + cfg.tipo() + " exige credencial");
+        }
         String base = cfg.urlBase();
+        if (base == null || base.isBlank()) {
+            throw new ProvedorRecusou(0, "o provedor " + cfg.tipo() + " não tem url base configurada");
+        }
         while (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
+        }
+        if (req.maxTokens() <= 0) {
+            throw new ProvedorRecusou(0, "maxTokens deve ser maior que zero");
+        }
+        String modelo = req.modelo();
+        if (modelo == null || modelo.isBlank()) {
+            modelo = cfg.modeloPadrao();
+        }
+        if (modelo == null || modelo.isBlank()) {
+            throw new ProvedorRecusou(0, "o provedor " + cfg.tipo() + " não tem modelo configurado");
         }
         List<String> sistemas = new ArrayList<>();
         ArrayNode mensagens = JSON.createArrayNode();
@@ -48,7 +64,7 @@ public class AdaptadorAnthropic implements AdaptadorProvedor {
             }
         }
         ObjectNode corpo = JSON.createObjectNode();
-        corpo.put("model", req.modelo() == null ? cfg.modeloPadrao() : req.modelo());
+        corpo.put("model", modelo);
         corpo.put("max_tokens", req.maxTokens());
         if (!sistemas.isEmpty()) {
             corpo.put("system", String.join("\n\n", sistemas));
@@ -97,7 +113,9 @@ public class AdaptadorAnthropic implements AdaptadorProvedor {
         } catch (JacksonException e) {
             throw new ProvedorRecusou(http.status(), http.corpo());
         }
-        if (raiz.isMissingNode()) {
+        // Qualquer corpo 2xx que não seja um objeto JSON — null, [], "texto", 123 — é inusável:
+        // falhar alto em vez de fingir sucesso com texto vazio e tokens zerados.
+        if (!raiz.isObject()) {
             throw new ProvedorRecusou(http.status(), http.corpo());
         }
         List<String> textos = new ArrayList<>();

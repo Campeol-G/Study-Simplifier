@@ -1,11 +1,13 @@
 package com.studys.llm.anthropic;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.studys.llm.ConfiguracaoProvedor;
 import com.studys.llm.Mensagem;
 import com.studys.llm.MetodoHttp;
 import com.studys.llm.Papel;
+import com.studys.llm.ProvedorRecusou;
 import com.studys.llm.Requisicao;
 import com.studys.llm.RequisicaoHttp;
 import com.studys.llm.TipoProvedor;
@@ -169,5 +171,67 @@ class AdaptadorAnthropicRequisicaoTest {
         assertThat(http.corpo())
                 .as("o corpo e byte a byte o gravado, sem contar a quebra final do arquivo")
                 .isEqualTo(esperado);
+    }
+
+    @Test
+    @DisplayName("credencial nula vira ProvedorRecusou, não exceção crua")
+    void credencialNulaViraProvedorRecusou() {
+        Requisicao req = requisicaoDeTeste(0.7);
+
+        assertThatThrownBy(() -> new AdaptadorAnthropic()
+                .montarRequisicao(req, configuracao("https://api.anthropic.com"), null))
+                .as("credencial ausente deve falhar alto com mensagem clara, não NPE opaco")
+                .isInstanceOfSatisfying(ProvedorRecusou.class, recusou -> {
+                    assertThat(recusou.status()).as("sem chamada, o status é zero").isZero();
+                    assertThat(recusou.corpo()).as("mensagem nomeia o provedor").contains("exige credencial");
+                });
+    }
+
+    @Test
+    @DisplayName("url base nula vira ProvedorRecusou")
+    void urlBaseNulaViraProvedorRecusou() {
+        Requisicao req = requisicaoDeTeste(0.7);
+        ConfiguracaoProvedor semUrl = new ConfiguracaoProvedor(
+                "anthropic", "Anthropic", TipoProvedor.ANTHROPIC, null, "claude-sonnet-4-5");
+
+        assertThatThrownBy(() -> new AdaptadorAnthropic().montarRequisicao(req, semUrl, CREDENCIAL))
+                .as("url base ausente deve falhar alto com mensagem clara")
+                .isInstanceOfSatisfying(ProvedorRecusou.class, recusou -> {
+                    assertThat(recusou.status()).isZero();
+                    assertThat(recusou.corpo()).contains("url base");
+                });
+    }
+
+    @Test
+    @DisplayName("maxTokens zero vira ProvedorRecusou")
+    void maxTokensZeroViraProvedorRecusou() {
+        Requisicao req = new Requisicao(
+                "claude-sonnet-4-5", 0, null, null,
+                List.of(new Mensagem(Papel.USUARIO, "ola")), Duration.ofSeconds(180));
+
+        assertThatThrownBy(() -> new AdaptadorAnthropic()
+                .montarRequisicao(req, configuracao("https://api.anthropic.com"), CREDENCIAL))
+                .as("maxTokens zerado deve falhar antes de montar a requisição")
+                .isInstanceOfSatisfying(ProvedorRecusou.class, recusou -> {
+                    assertThat(recusou.status()).isZero();
+                    assertThat(recusou.corpo()).contains("maxTokens");
+                });
+    }
+
+    @Test
+    @DisplayName("modelo nulo e sem padrão vira ProvedorRecusou")
+    void modeloNuloESemPadraoViraProvedorRecusou() {
+        Requisicao semModelo = new Requisicao(
+                null, 1024, null, null,
+                List.of(new Mensagem(Papel.USUARIO, "ola")), Duration.ofSeconds(180));
+        ConfiguracaoProvedor semPadrao = new ConfiguracaoProvedor(
+                "anthropic", "Anthropic", TipoProvedor.ANTHROPIC, "https://api.anthropic.com", null);
+
+        assertThatThrownBy(() -> new AdaptadorAnthropic().montarRequisicao(semModelo, semPadrao, CREDENCIAL))
+                .as("sem modelo nem padrão, não há o que colocar no campo model")
+                .isInstanceOfSatisfying(ProvedorRecusou.class, recusou -> {
+                    assertThat(recusou.status()).isZero();
+                    assertThat(recusou.corpo()).contains("modelo");
+                });
     }
 }

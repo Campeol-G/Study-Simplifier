@@ -11,7 +11,7 @@ public class ProvedorRecusou extends RuntimeException {
     private final String corpo;
 
     public ProvedorRecusou(int status, String corpo) {
-        super("o provedor recusou a chamada com status " + status);
+        super("o provedor não devolveu algo usável (status " + status + ")");
         this.status = status;
         this.corpo = corpo;
     }

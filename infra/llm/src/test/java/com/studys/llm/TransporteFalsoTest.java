@@ -91,4 +91,28 @@ class TransporteFalsoTest {
                 .as("o falso e o transporte real devolvem o mesmo corpo")
                 .isEqualTo(peloReal);
     }
+
+    @Test
+    @DisplayName("falso enfileira respostas e as devolve em ordem")
+    void falsoEnfileiraRespostasOrdem() {
+        TransporteFalso falso = new TransporteFalso();
+        falso.enfileirar(new RespostaHttp(429, "limite de uso"));
+        falso.enfileirar(new RespostaHttp(200, "ok"));
+
+        assertThat(falso.enviar(post("http://x", "{}")).status()).isEqualTo(429);
+        assertThat(falso.enviar(post("http://x", "{}")).status()).isEqualTo(200);
+        assertThat(falso.chamadas()).as("contabiliza cada chamada ao transporte").isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("falso conta chamadas com resposta única configurada")
+    void falsoContaChamadas() {
+        TransporteFalso falso = new TransporteFalso();
+        falso.responder(new RespostaHttp(200, "ok"));
+        falso.enviar(post("http://x", "{}"));
+        falso.enviar(post("http://x", "{}"));
+        falso.enviar(post("http://x", "{}"));
+
+        assertThat(falso.chamadas()).as("três envios, três chamadas contadas").isEqualTo(3);
+    }
 }

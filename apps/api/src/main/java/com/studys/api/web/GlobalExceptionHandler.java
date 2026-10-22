@@ -21,9 +21,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 /**
  * Corpo de erro da API: sempre {@code {"mensagem": ...}}, em todos os status.
  *
- * <p>Erro de cliente é mapeado com a mensagem dele, porque ela é útil e não é interna. Erro de
- * servidor vira {@code "Erro interno"} e a exceção completa vai para o log — o cliente não recebe
- * nem a mensagem, nem o nome da classe, nem a stack.
+ * <p>Erro de cliente vai com a mensagem dele (é útil e não é interna). Erro de servidor vira
+ * {@code "Erro interno"} e a exceção inteira fica no log.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -32,17 +31,14 @@ public class GlobalExceptionHandler {
 
     private static final String ERRO_INTERNO = "Erro interno";
 
-    /**
-     * Os dois davam 400 com o mesmo corpo (achado A18 da auditoria): um handler só resolve.
-     * {@code StatusInvalidoException} estende {@code IllegalArgumentException}, então cai aqui
-     * junto com "Assunto é obrigatório".
-     */
+    // POR QUE: StatusInvalidoException estende IllegalArgumentException, então um handler resolve
+    // os dois, e a mensagem do cliente é útil.
     @ExceptionHandler({IllegalArgumentException.class, StatusInvalidoException.class})
     public ResponseEntity<Map<String, String>> requisicaoInvalida(RuntimeException e) {
         return corpo(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
-    /** JSON malformado no body: sem handler, caía no formato padrão do Spring (achado A19). */
+    /** JSON malformado no body: sem handler, caía no formato padrão do Spring. */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> jsonInvalido(HttpMessageNotReadableException e) {
         LOG.debug("Body ilegível", e);
@@ -85,20 +81,15 @@ public class GlobalExceptionHandler {
         return corpo(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Tipo de conteúdo não suportado");
     }
 
-    /**
-     * Fallback de 500 (achado A3). A exceção vai inteira para o log; o cliente recebe só
-     * {@code "Erro interno"}.
-     *
-     * <p><strong>Cuidado clássico, verificado:</strong> um handler de {@code Exception} também
-     * alcança as exceções que o Spring já classificou, porque
-     * {@code ExceptionHandlerExceptionResolver} (ordem 0) tem precedência sobre
-     * {@code ResponseStatusExceptionResolver} (ordem 1) e sobre o
-     * {@code DefaultHandlerExceptionResolver}. Sem o desvio abaixo, um {@code 406} de
-     * {@code Accept} incompatível viraria {@code 500 "Erro interno"} — trocar um erro de cliente
-     * claramente identificado por um de servidor. Por isso, quando a exceção implementa
-     * {@code ErrorResponse}, o status dela é respeitado e a mensagem também: são de cliente, não
-     * são segredo interno.
-     */
+    // POR QUE: Fallback de 500. A exceção vai inteira para o log; o cliente recebe só
+    // {@code "Erro interno"}. Cuidado clássico, verificado: um handler de {@code Exception} também
+    // alcança as exceções que o Spring já classificou, porque
+    // {@code ExceptionHandlerExceptionResolver} (ordem 0) tem precedência sobre
+    // {@code ResponseStatusExceptionResolver} (ordem 1) e sobre o
+    // {@code DefaultHandlerExceptionResolver}. Sem o desvio abaixo, um {@code 406} de
+    // {@code Accept} incompatível viraria {@code 500 "Erro interno"} — trocar um erro de cliente
+    // claramente identificado por um de servidor. Por isso, quando a exceção implementa
+    // {@code ErrorResponse}, o status dela é respeitado e a mensagem também.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> erroInesperado(Exception e) {
         if (e instanceof ErrorResponse erroDeCliente) {
@@ -110,11 +101,8 @@ public class GlobalExceptionHandler {
         return corpo(HttpStatus.INTERNAL_SERVER_ERROR, ERRO_INTERNO);
     }
 
-    /**
-     * {@code ResponseStatusException} traz o motivo que o código passou; as demais implementações de
-     * {@code ErrorResponse} trazem a descrição do próprio status, que já é informação útil e não é
-     * detalhe interno.
-     */
+    // ResponseStatusException traz o motivo que o código passou; as demais implementações de
+    // ErrorResponse trazem a descrição do próprio status, já útil e não detalhe interno.
     private static String mensagemDe(ErrorResponse erro) {
         String motivo = erro.getBody().getDetail();
         return motivo == null || motivo.isBlank() ? erro.getBody().getTitle() : motivo;

@@ -39,10 +39,8 @@ public class SqliteDataSourceConfig {
                 .build();
     }
 
-    /**
-     * Extrai o caminho do arquivo da URL JDBC do SQLite e cria o diretorio que o contem. Nao faz
-     * nada para outra URL, nem para banco em memoria (que nao tem arquivo).
-     */
+    // Extrai o caminho do arquivo da URL JDBC do SQLite e cria o diretorio que o contem. Nao faz
+    // nada para outra URL, nem para banco em memoria (que nao tem arquivo).
     static void criarDiretorioDoBanco(String url) {
         Path arquivo = arquivoDe(url);
         if (arquivo == null) {

@@ -14,7 +14,6 @@ const STATUS = [
 export function LandingPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 pb-20 pt-14 sm:pt-20">
-      {/* path da rota */}
       <p className="text-[13px] text-zinc-600">~/home</p>
 
       {/* titulo — respiro grande, hierarquia por tamanho */}

@@ -75,11 +75,9 @@ class ContratoPlanoTest {
         esquemaSaida = lerRaiz("prompts", "plan-generation", "esquema-saida.json");
     }
 
-    /**
-     * O Maven roda o teste com o diretorio do modulo como CWD, entao o contrato fica a dois niveis acima.
-     * Falha com mensagem explicita quando o caminho nao existe, em vez de estourar um NoSuchFileException
-     * sem dizer qual arquivo faltou.
-     */
+    // O Maven roda o teste com o diretorio do modulo como CWD, entao o contrato fica a dois niveis
+    // acima. Falha com mensagem explicita quando o caminho nao existe, em vez de estourar um
+    // NoSuchFileException sem dizer qual arquivo faltou.
     private static Path caminho(String... partes) {
         Path caminho = CONTRATO;
         for (String parte : partes) {
@@ -336,7 +334,6 @@ class ContratoPlanoTest {
                 .hasSize(5);
     }
 
-    /** Uma declaracao de {@code nivel} dentro de um esquema, com o caminho onde ela foi achada. */
     private record EnumDeNivel(String caminho, JsonNode no) {
     }
 

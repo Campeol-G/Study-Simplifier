@@ -139,16 +139,14 @@ class BancoSqliteBootstrapTest {
         }
     }
 
-    /**
-     * Sobe a aplicacao de verdade contra um diretorio novo. {@code WebApplicationType.NONE} evita
-     * ocupar porta: aqui o que importa e a cadeia Flyway/DataSource/Hibernate, que nao depende de web.
-     *
-     * <p>As sobrescritas vao como argumento de linha de comando, e nao por
-     * {@code SpringApplicationBuilder.properties(...)}: aquele registra {@code defaultProperties},
-     * que tem a precedencia mais baixa de todas e perde para o {@code application.properties} de
-     * {@code src/test/resources}. Com ele, este teste rodava contra o banco do tmpdir, que ja
-     * existia, e a criacao de diretorio nunca era exercitada.
-     */
+    // Sobe a aplicacao de verdade contra um diretorio novo. {@code WebApplicationType.NONE} evita
+    // ocupar porta: aqui o que importa e a cadeia Flyway/DataSource/Hibernate, que nao depende de web.
+    //
+    // As sobrescritas vao como argumento de linha de comando, e nao por
+    // {@code SpringApplicationBuilder.properties(...)}: aquele registra {@code defaultProperties},
+    // que tem a precedencia mais baixa de todas e perde para o {@code application.properties} de
+    // {@code src/test/resources}. Com ele, este teste rodava contra o banco do tmpdir, que ja
+    // existia, e a criacao de diretorio nunca era exercitada.
     private static ConfigurableApplicationContext novoContexto(Path diretorio) {
         return new SpringApplicationBuilder(StudySApplication.class)
                 .web(WebApplicationType.NONE)

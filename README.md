@@ -12,13 +12,14 @@ pronto e o que é promessa.
 ## Estado atual
 
 O que **funciona**: criar plano, listar, buscar, mudar o status do plano e o status de cada nó, com
-persistência em SQLite, migrations versionadas e uma suíte de 51 testes passando (17 de integração
-com o contexto Spring, mais testes de contrato, de esquema e de entidade).
+persistência em SQLite, migrations versionadas e uma suíte de 96 testes passando (46 em `apps/api`,
+5 em `infra/db`, 45 em `infra/llm`).
 
 O que **ainda não existe**, apesar de estar declarado no código:
 
 - **Onboarding com IA.** `services/onboarding-chat` é um módulo vazio. Não há conversa de
-  descoberta, nem nivelamento, nem chamada a provedor de IA em lugar nenhum do repositório.
+  descoberta, nem nivelamento, nem serviço que chame a IA. Existe um cliente HTTP e um adaptador
+  da Anthropic em `infra/llm`, mas nenhum serviço os chama ainda.
 - **Geração de conteúdo.** `services/content-generation` é um módulo vazio. A tabela `content_cache`
   existe e aceita vários tipos por tópico, mas nada escreve nela.
 - **Readaptação do plano.** A árvore gerada hoje é estática: uma MATERIA e três TOPICOs, com
@@ -45,7 +46,7 @@ O que **ainda não existe**, apesar de estar declarado no código:
 ./mvnw -pl apps/api spring-boot:run
 ```
 
-O `install` é necessário porque `spring-boot:run` roda só em `apps/api`, e os outros seis módulos
+O `install` é necessário porque `spring-boot:run` roda só em `apps/api`, e os outros sete módulos
 são bibliotecas que precisam estar resolvidas para ela compilar.
 
 Endpoints (todos sem autenticação):
@@ -76,13 +77,14 @@ cópias: pode ignorá-los.
 
 ## Estrutura de diretórios
 
-Sete módulos Maven e duas pastas fora do build. `apps/` são executáveis, `services/` são regras de
+Oito módulos Maven e duas pastas fora do build. `apps/` são executáveis, `services/` são regras de
 domínio, `shared/` é o que tudo compartilha e `infra/` é a base.
 
 | Módulo                        | O que faz                                                                      |
 | ----------------------------- | ------------------------------------------------------------------------------ |
 | `shared/schemas`              | contratos Java compartilhados (plano, nó, tentativa, conteúdo, chat)           |
 | `infra/db`                    | entidades JPA, repositórios e a migration do SQLite; cria o diretório do banco |
+| `infra/llm`                   | tipos neutros da camada de IA, transporte HTTP e adaptador Anthropic; sem retry, sem registro de provedor, sem serviço chamando |
 | `services/plans`              | CRUD de planos, sem web e sem HTTP                                             |
 | `services/plan-engine`        | gera a árvore de nós e muda o status de um nó                                  |
 | `services/content-generation` | declarado, **vazio**: geração de conteúdo a partir do cache                    |

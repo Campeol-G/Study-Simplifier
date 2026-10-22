@@ -1,6 +1,8 @@
 package com.studys.llm;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -14,7 +16,9 @@ public record RequisicaoHttp(
         Objects.requireNonNull(metodo, "metodo é obrigatório");
         Objects.requireNonNull(url, "url é obrigatória");
         Objects.requireNonNull(timeout, "timeout é obrigatório");
-        cabecalhos = cabecalhos == null ? Map.of() : Map.copyOf(cabecalhos);
+        // LinkedHashMap + unmodifiable preserva a ordem de declaração dos cabeçalhos,
+        // importante para comparar logs entre execuções.
+        cabecalhos = cabecalhos == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(cabecalhos));
         corpo = corpo == null ? "" : corpo;
     }
 
@@ -29,8 +33,9 @@ public record RequisicaoHttp(
                 .map(entrada -> entrada.getKey() + "="
                         + (carregaCredencial(entrada.getKey()) ? VALOR_MASCARADO : entrada.getValue()))
                 .collect(Collectors.joining(", ", "{", "}"));
+        String corpoVisivel = corpo.length() > 256 ? corpo.substring(0, 256) + "…[truncado]" : corpo;
         return "RequisicaoHttp[metodo=" + metodo + ", url=" + url + ", cabecalhos=" + cabecalhosVisiveis
-                + ", corpo=" + corpo + ", timeout=" + timeout + "]";
+                + ", corpo=" + corpoVisivel + ", timeout=" + timeout + "]";
     }
 
     private static boolean carregaCredencial(String nome) {

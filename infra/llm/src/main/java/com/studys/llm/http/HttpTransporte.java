@@ -27,10 +27,10 @@ public class HttpTransporte implements Transporte {
 
     private static final int TRECHO_LEITURA_BYTES = 8192;
 
-    private final HttpClient cliente;
+    // Um cliente compartilhado evita criar uma thread de selector por instância.
+    private static final HttpClient cliente = HttpClient.newHttpClient();
 
     public HttpTransporte() {
-        this.cliente = HttpClient.newHttpClient();
     }
 
     @Override

@@ -9,5 +9,11 @@ public record Resposta(String texto, String raciocinio, String motivoDeParada, T
         if (motivoDeParada == null) {
             motivoDeParada = "";
         }
+        if (texto == null) {
+            texto = "";
+        }
+        if (uso == null) {
+            uso = new Tokens(0, 0);
+        }
     }
 }

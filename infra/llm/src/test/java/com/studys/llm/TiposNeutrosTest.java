@@ -1,6 +1,7 @@
 package com.studys.llm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -87,5 +88,15 @@ class TiposNeutrosTest {
         assertThat(requisicao.esquema())
                 .as("sem esquema significa resposta livre, nao erro")
                 .isNull();
+    }
+
+    @Test
+    @DisplayName("requisição com mensagens nula lança exceção que nomeia o campo")
+    void requisicaoComMensagensNulaLancaExcecaoComMensagem() {
+        assertThatThrownBy(() -> new Requisicao(
+                "modelo", 100, null, null, null, Duration.ofSeconds(60)))
+                .as("lista de mensagens é obrigatória e o erro deve nomear o campo")
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("mensagens é obrigatório");
     }
 }
